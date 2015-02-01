@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+<script type="text/javascript">
+	var CanvasPosition = function(){
+		var canId = document.getElementById("canvasDraw");
+		var context = canId.getContext("2d");
+		var dragging = true;
+		var writeMessage = function(message, x, y){
+			context.clearRect(0, 0, canId.width, canId.height);
+			context.font = "18px arial";
+			context.fillStyle =  "black";
+			context.fillText(message, x, y);
+		}
+		
+		var getMousePos = function(evt){
+			var rect = canId.getBoundingClientRect();
+			return {
+				x: evt.clientX - rect.left,
+				y: evt.clientY - rect.top
+			}
+		}
+		
+		var eventListener = function(evt){
+			var mousePos = getMousePos(evt);
+			var message = "mouse position: " + mousePos.x + "," + mousePos.y;
+			writeMessage(message, mousePos.x, mousePos.y);
+		}
+		
+		canId.addEventListener('mousedown', function(evt){
+			eventListener(evt);
+			console.log("aaa");
+			
+			if(dragging){
+				console.log("ccc");
+				canId.addEventListener('mousemove', function(evt){
+		 			eventListener(evt);
+					
+				}, false)
+			}
+			dragging = false;
+		}, false)
+		
+ 		canId.removeEventListener('mousedown', function(evt){
+ 			eventListener(evt);
+			console.log("bbbb");
+			
+			if(!dragging){
+				console.log("eeeeeeeeee");
+				canId.removeEventListener('mousemove', function(evt){
+		 			eventListener(evt);
+					
+				})
+			}
+			dragging = true;
+		}, false)
+		
+		
+		
+		
+	}
+	window.addEventListener('load', CanvasPosition, false);
+</script>
+
+</head>
+<body>
+	좌표값 구하기
+	<canvas id="canvasDraw" width="578" height="200" style="border:1px solid #ccc"></canvas>
+	
+	
+</body>
+</html>
