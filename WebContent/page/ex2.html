@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+<script type="text/javascript">
+var canvas = function(){
+	var canvasId = document.getElementById("canvasDraw");
+	var context = canvasId.getContext("2d");
+	 var started = false;
+	 var init = function(){
+		 
+		 canvasId.addEventListener('mousemove', mouseover, false);
+	 }
+	 var mouseover = function(evt){
+		var x, y;
+		
+		x = evt.layerX;
+		y = evt.layerY;
+		
+		context.strokeRect(x, y, x*3, y*3);
+		/* if(!started){
+			context.beginPath();
+			context.moveTo(x, y);
+			started = true;
+		}else{
+			context.lineTo(x, y);
+			context.stroke();
+		} */
+	}
+	 init();
+}
+window.addEventListener('load', canvas, false);
+
+window.addEventListener('load', function(){
+	var cnvs = document.getElementById("canvasDraw2");
+	var ctx = cnvs.getContext("2d");
+	
+	ctx.strokeRect(30, 30, 40, 40);
+}, false)
+</script>
+</head>
+<body>
+
+<canvas id="canvasDraw" width="578" height="200" style="border:1px solid #ccc"></canvas>
+<canvas id="canvasDraw2" width="578" height="200" style="border:1px solid #ccc"></canvas>
+
+</body>
+</html>
