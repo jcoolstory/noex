@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <script>
-function refreshImage()
+
+function refreshImage(src)
 {
 	var c = document.getElementById("myCanvas");
 	var ctx = c.getContext("2d");
-	var img = document.getElementById("scream");
+	var img = src;
+	console.log(src)
 	ctx.drawImage(img, 10, 10);
 }
 
@@ -13,28 +15,22 @@ function readURL(input) {
 	if (input.files && input.files[0]) {
 		var reader = new FileReader(); //파일을 읽기 위한 FileReader객체 생성
 		reader.onload = function (e) {
-			console.log(input )
-			//$('#main_img1').attr('src', e.target.result); //이미지 Tag의 SRC속성에 읽어들인 File내용을 지정			
+			
+			img = new Image();
+			img.src = URL.createObjectURL(input.files[0]);
+			img.onload = function(){
+				refreshImage(img);
+			}
+			
 		}
 		reader.readAsDataURL(input.files[0]);//File내용을 읽어 dataURL형식의 문자열로 저장
 	}
 }
-		 
-	//file 양식으로 이미지를 선택(값이 변경) 되었을때 처리하는 코드
-	//$("#rqimg1").change(function(){
-//		readURL(this);
-//	});
-	
 
 </script>
 <body>
-
-<p>Image to use:</p>
 <img style="display:none" id="scream" src="img_the_scream.jpg" alt="The Scream" width="220" height="277">
-
-<p>Canvas:</p>
-<p><button onclick="refreshImage()" >imageview</button></p>
-<input type="file" onchange="readURL(this)"  /> file 
+<p><input type="file" onchange="readURL(this)"  /> file </p> 
 <canvas id="myCanvas" width="250" height="300" style="border:1px solid #d3d3d3;">
 Your browser does not support the HTML5 canvas tag.</canvas>
 
