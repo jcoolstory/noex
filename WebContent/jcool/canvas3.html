@@ -1,45 +1,73 @@
 <!DOCTYPE html>
 <html>
 <script>
-
-function refreshImage(src)
-{
-	var c = document.getElementById("myCanvas");
-	var ctx = c.getContext("2d");
-	var img = src;
-	console.log(src)
-	ctx.drawImage(img, 10, 10);
-}
-
-function readURL(input) {
-	if (input.files && input.files[0]) {
-		var reader = new FileReader(); //파일을 읽기 위한 FileReader객체 생성
-		reader.onload = function (e) {
-			
-			img = new Image();
-			img.src = URL.createObjectURL(input.files[0]);
-			img.onload = function(){
-				refreshImage(img);
-			}
-			
-		}
-		reader.readAsDataURL(input.files[0]);//File내용을 읽어 dataURL형식의 문자열로 저장
+	function refreshImage(name, src) {
+		var c = document.getElementById(name);
+		var ctx = c.getContext("2d");
+		var img = src;
+		
+		ctx.drawImage(img, 0, 0,ctx.canvas.width, ctx.canvas.height);
 	}
+	function readURL(input) {
+		if (input.files && input.files[0]) {
+			var reader = new FileReader(); //파일을 읽기 위한 FileReader객체 생성
+			reader.onload = function(e) {
+
+				img = new Image();
+				img.src = URL.createObjectURL(input.files[0]);
+				img.onload = function() {
+					refreshImage(input.name, img);
+				}
+			}
+			reader.readAsDataURL(input.files[0]);//File내용을 읽어 dataURL형식의 문자열로 저장
+		}
+	}
+</script>
+<style>
+.imageViewer {
+	float: left;
+	border: 1px solid #aaa;
+	text-align: center;
+	padding: 10px;
+	background: #f5f5f5;
 }
 
-</script>
+.imageViewer input {
+	margin-bottom: 10px;
+}
+.imageViewer canvas {
+	background: #ddd;
+	border: 1px solid #aaa;
+}
+</style>
 <body>
-<img style="display:none" id="scream" src="img_the_scream.jpg" alt="The Scream" width="220" height="277">
-<p><input type="file" onchange="readURL(this)"  /> file </p> 
-<canvas id="myCanvas" width="250" height="300" style="border:1px solid #d3d3d3;">
-Your browser does not support the HTML5 canvas tag.</canvas>
+	<div class="imageViewer">
 
-<script>
-var c = document.getElementById("myCanvas");
-var ctx = c.getContext("2d");
-var img = document.getElementById("scream");
-ctx.drawImage(img, 10, 10);
-</script>
+		<input type="file" name="view01" onchange="readURL(this)" /> <br />
+		<canvas id="view01" width="250" height="250">
+Your browser does not support the HTML5 canvas tag.</canvas>
+	</div>
+	<div class="imageViewer">
+
+		<input type="file" name="view02" onchange="readURL(this)" /> <br />
+		<canvas id="view02" width="250" height="250"
+			>
+Your browser does not support the HTML5 canvas tag.</canvas>
+	</div>
+	<div class="imageViewer">
+
+		<input type="file" name="view03" onchange="readURL(this)" /> <br />
+		<canvas id="view03" width="250" height="250"
+			>
+Your browser does not support the HTML5 canvas tag.</canvas>
+	</div>
+	<div class="imageViewer">
+
+		<input type="file" name="view04" onchange="readURL(this)" /> <br />
+		<canvas id="view04" width="250" height="250"
+			>
+Your browser does not support the HTML5 canvas tag.</canvas>
+	</div>
 </body>
 </html>
 
