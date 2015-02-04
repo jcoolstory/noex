@@ -56,10 +56,6 @@ SimpleDiskParticle.prototype.drawToContext = function(theContext) {
 	theContext.fill();
 }
 
-function canvasSupport() {
-	return Modernizr.canvas;
-}
-
 function canvasApp(){
 	var theCanvas = document.getElementById("canvasOne");
 	var context = theCanvas.getContext("2d");
