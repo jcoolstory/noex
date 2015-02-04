@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+
+<script type="text/javascript">
+//Simple class example
+function SimpleSquareParticle(posX, posY) {
+		this.x = posX;
+		this.y = posY;
+		this.velX = 0;
+		this.velY = 0;
+		this.accelX = 0;
+		this.accelY = 0;
+		this.color = "#FF0000";
+		this.radius = 10;
+}
+
+//The function below returns a Boolean value representing whether the point with the coordinates supplied "hits" the particle.
+SimpleSquareParticle.prototype.hitTest = function(hitX,hitY) {
+	return((hitX > this.x - this.radius)&&(hitX < this.x + this.radius)&&(hitY > this.y - this.radius)&&(hitY < this.y + this.radius));
+}
+
+//A function for drawing the particle.
+SimpleSquareParticle.prototype.drawToContext = function(theContext) {
+	theContext.fillStyle = this.color;
+	theContext.fillRect(this.x - this.radius, this.y - this.radius, 2*this.radius, 2*this.radius);
+}
+
+//Simple class example
+function SimpleDiskParticle(posX, posY) {
+		this.x = posX;
+		this.y = posY;
+		this.velX = 0;
+		this.velY = 0;
+		this.accelX = 0;
+		this.accelY = 0;
+		this.color = "#FF0000";
+		this.radius = 10;
+}
+
+//The function below returns a Boolean value representing whether the point with the coordinates supplied "hits" the particle.
+SimpleDiskParticle.prototype.hitTest = function(hitX,hitY) {
+	var dx = this.x - hitX;
+	var dy = this.y - hitY;
+	
+	return(dx*dx + dy*dy < this.radius*this.radius);
+}
+
+//A function for drawing the particle.
+SimpleDiskParticle.prototype.drawToContext = function(theContext) {
+	theContext.fillStyle = this.color;
+	theContext.beginPath();
+	theContext.arc(this.x, this.y, this.radius, 0, 2*Math.PI, false);
+	theContext.closePath();
+	theContext.fill();
+}
+
+function canvasSupport() {
+	return Modernizr.canvas;
+}
+
+function canvasApp(){
+	var theCanvas = document.getElementById("canvasOne");
+	var context = theCanvas.getContext("2d");
+	
+	var numShapes,
+	shapes,
+	dragIndex,
+	dragging,
+	mouseX,
+	mouseY,
+	dragHoldX,
+	dragHoldY,
+	timer,
+	targetX,
+	targetY,
+	easeAmount;
+	
+	init();
+	
+	function init(){
+		numShapes = 60;
+		easeAmount = 0.45;
+		shapes = [];
+		makeShapes();
+		drawScreen();
+		
+		theCanvas.addEventListener("mousedown", mouseDownListener, false);
+	}
+	
+	function makeShapes(){
+		var i,
+		tempX,
+		tempY,
+		tempRad,
+		tempR,
+		tempG,
+		tempB,
+		tempA,
+		tempColor;
+		
+		for(i =0; i < numShapes; i++){
+			tempRad = 5+ Math.floor(Math.random()*20);
+			tempX = Math.random()*(theCanvas.width-tempRad);
+			tempY = Math.random()*(theCanvas.height-tempRad);
+			
+			tempR = Math.floor(Math.random()*255);
+			tempG = Math.floor(Math.random()*255);
+			tempB = Math.floor(Math.random()*255);
+			tempA = 0.3 + 0.5 * Math.random();
+			tempColor = "rgba(" + tempR + "," + tempG +","+ tempB + "," + tempA + ")";
+			
+			if(Math.random() < 0.5)
+				tempShape = new SimpleDiskParticle(tempX, tempY);
+			else
+				tempShape = new SimpleSquareParticle(tempX, tempY);
+			
+			tempShape.color = tempColor;
+			tempShape.radius = tempRad;
+			shapes.push(tempShape);
+		}
+	}
+	
+	function mouseDownListener(evt){
+		var i;
+		
+		var bRect = theCanvas.getBoundingClientRect();
+		mouseX = (evt.clientX - bRect.left) * (theCanvas.width/bRect.width);
+		mouseY = (evt.clientY - bRect.top) * (theCanvas.height/bRect.height);
+		
+		for(i =0; i < numShapes; i++){
+			if(shapes[i].hitTest(mouseX, mouseY)){
+				dragging = true;
+				gragIndex = i;
+			}
+		}
+		if(dragging){
+			window.addEventListener("mousemove", mouseMoveListener, false);
+			
+			shapes.push(shapes.splice(dragIndex, 1)[0]);
+			
+			dragHoldX = mouseX - shapes[numShapes-1].x;
+			dragHoldY = mouseY - shapes[numShapes-1].y;
+			
+			targetX = mouseX - dragHoldX;
+			targetY = mouseY - dragHoldY;
+			
+			timer = setInterval(onTimerTick, 1000/30);
+		}
+		theCanvas.removeEventListener("mousedown", mouseDownListener, false);
+		window.addEventListener("mouseup", mouseUpListener, false);
+		
+		if(evt.preventDefault){
+			evt.preventDefault();
+		}else if(evt.returnValue){
+			evt.returnValue = false;
+		}
+		return false;
+		
+	}
+	
+	function onTimerTick(){
+		shapes[numShapes - 1].x = shapes[numShapes - 1].x + easeAmount * (targetX- shapes[numShapes -1].x);
+		shapes[numShapes - 1].y = shapes[numShapes - 1].y + easeAmount * (targetY- shapes[numShapes -1].y);
+		
+		if((!dragging) && (Math.abs(shapes[numShapes-1].x-targetX) < 0.1) && (Math.abs(shapes[numShapes-1].y-targetY) < 0.1)){
+			shapes[numShapes -1].x = targetX;
+			shapes[numShapes -1].y = targetY;
+			clearInterval(timer);
+		}
+		drawScreen();
+	}
+	
+	function mouseUpListener(evt){
+		theCanvas.addEventListener("mousedown", mouseDownListener, false);
+		window.removeEventListener("mouseup", mouseUpListener, false);
+		if(dragging){
+			dragging = false;
+			window.removeEventListener("mousemove", mouseMoveListener, false);
+		}
+	}
+	
+	function mouseMoveListener(evt){
+		var posX,
+		posY,
+		shapeRad,
+		minX,
+		maxX,
+		minY,
+		maxY,
+		bRect,
+		mouseX,
+		mouseY;
+		
+		shapeRad = shapes[numShapes - 1].radius;
+		minX = shapeRad;
+		maxX = theCanvas.width - shapeRad;
+		minY = shapeRad;
+		maxY = theCanvas.height - shapeRad;
+		
+		bRect = theCanvas.getBoundingClientRect();
+		mouseX = ( evt.clientX - bRect.left ) * ( theCanvas.width/bRect.width );
+		mouseY = ( evt.clientY - bRect.top ) * ( theCanvas.height/bRect.height );
+		
+		posX = mouseX - dragHoldX;
+		posX = (posX < minX) ? minX : ((posX > maxX) ? maxX : posX);
+		posY = mouseY - dragHoldY;
+		posY = (posY < minX) ? minY : ((posY > maxY) ? maxY : posY);
+		
+		targetX = posX;
+		targetY = posY
+	}
+	
+	function drawShapes(){
+		var i;
+		for(i = 0; i < numShapes; i++){
+			shapes[i].drawToContext(context);
+		}
+	}
+	
+	
+	function drawScreen(){
+		context.fillStyle = "#000000";
+		context.fillRect(0, 0, theCanvas.width, theCanvas.height);
+		drawShapes();
+	}
+}
+
+window.addEventListener("load", canvasApp, false);
+</script>
+</head>
+
+<body>
+<canvas id="canvasOne" width="500" height="500"></canvas>
+</body>
+</html>
