@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <script>
+var maxImage =4;
 	function refreshImage(name, src) {
 		var c = document.getElementById(name);
 		var ctx = c.getContext("2d");
@@ -8,18 +9,25 @@
 		
 		ctx.drawImage(img, 0, 0,ctx.canvas.width, ctx.canvas.height);
 	}
-	function readURL(input) {
-		if (input.files && input.files[0]) {
-			var reader = new FileReader(); //파일을 읽기 위한 FileReader객체 생성
-			reader.onload = function(e) {
-
-				img = new Image();
-				img.src = URL.createObjectURL(input.files[0]);
-				img.onload = function() {
-					refreshImage(input.name, img);
-				}
+	function readSub(index,obj){
+		var reader = new FileReader(); //파일을 읽기 위한 FileReader객체 생성
+		reader.onload = function(e) {
+			img = new Image();
+			img.src = URL.createObjectURL(obj);
+			img.onload = function() {			
+				refreshImage("view"+(index+1), this);
 			}
-			reader.readAsDataURL(input.files[0]);//File내용을 읽어 dataURL형식의 문자열로 저장
+		}	
+		reader.readAsDataURL(obj);//File내용을 읽어 dataURL형식의 문자열로 저장	
+	}
+	function readURL(input,name) {
+		
+		if (input.files && input.files[0]) {
+			var length = input.files.length  > maxImage ? maxImage: input.files.length;
+			for (var i = 0 ; i < length ; i++)
+			{				
+				readSub(i,input.files[i]);
+			}			
 		}
 	}
 </script>
@@ -41,31 +49,24 @@
 }
 </style>
 <body>
-	<div class="imageViewer">
-
-		<input type="file" name="view01" onchange="readURL(this)" /> <br />
-		<canvas id="view01" width="250" height="250">
+<input type="file" id="inputbox" name="view1" onchange="readURL(this)" multiple="multiple"/> <br />
+	<div class="imageViewer">		
+		<canvas id="view1" width="250" height="250">
 Your browser does not support the HTML5 canvas tag.</canvas>
 	</div>
+	
 	<div class="imageViewer">
-
-		<input type="file" name="view02" onchange="readURL(this)" /> <br />
-		<canvas id="view02" width="250" height="250"
-			>
+		<canvas id="view2" width="250" height="250">
 Your browser does not support the HTML5 canvas tag.</canvas>
 	</div>
+	
 	<div class="imageViewer">
-
-		<input type="file" name="view03" onchange="readURL(this)" /> <br />
-		<canvas id="view03" width="250" height="250"
-			>
+		<canvas id="view3" width="250" height="250">
 Your browser does not support the HTML5 canvas tag.</canvas>
 	</div>
+	
 	<div class="imageViewer">
-
-		<input type="file" name="view04" onchange="readURL(this)" /> <br />
-		<canvas id="view04" width="250" height="250"
-			>
+		<canvas id="view4" width="250" height="250">
 Your browser does not support the HTML5 canvas tag.</canvas>
 	</div>
 </body>
