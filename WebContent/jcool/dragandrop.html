@@ -2,7 +2,8 @@
 <html>
 <head>
 <style>
-#div1 {width:350px;height:70px;padding:10px;border:1px solid #aaaaaa;}
+	#div1 {width:350px;height:70px;padding:10px;border:1px solid #aaaaaa;}
+	#drop_zone{ width:300px;height:60px}
 </style>
 </head>
 <body>
@@ -10,22 +11,49 @@
 <div id="drop_zone">Drop files here</div>
 <output id="list"></output>
 </div>
+canvas
+<canvas id="view1" width="250" height="250">
+Your browser does not support the HTML5 canvas tag.</canvas>
+<div id='viewer'>
+img tag
+</div>
 <script>
+function refreshImage(name, src) {
+	var c = document.getElementById(name);
+	var ctx = c.getContext("2d");
+	var img = src;
+	
+	ctx.drawImage(img, 0, 0,ctx.canvas.width, ctx.canvas.height);
+}
+	function readSub(obj){
+		var reader = new FileReader();
+		reader.onload = function(e) {
+			img = new Image();
+			img.src = URL.createObjectURL(obj);
+			img.onload = function() {			
+				document.getElementById('viewer').innerHTML = '<img src="' + img.src+'"/>';
+				refreshImage('view1',this)
+			}
+		}	
+		reader.readAsDataURL(obj);	
+	}
+
   function handleFileSelect(evt) {
     evt.stopPropagation();
     evt.preventDefault();
 
     var files = evt.dataTransfer.files; // FileList object.
+    readSub(files[0]);
 
     // files is a FileList of File objects. List some properties.
     var output = [];
-    for (var i = 0, f; f = files[i]; i++) {
-      output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
-                  f.size, ' bytes, last modified: ',
-                  f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
-                  '</li>');
-    }
-    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+    //for (var i = 0, f; f = files[i]; i++) {
+    //  output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ',
+    //              f.size, ' bytes, last modified: ',
+    //              f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a',
+    //              '</li>');
+   // }
+    //document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
   }
 
   function handleDragOver(evt) {
