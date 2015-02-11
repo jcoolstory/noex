@@ -1,23 +1,21 @@
 <!DOCTYPE html>
 <html>
 <script>
-//Check for the various File API support.
 if (window.File && window.FileReader && window.FileList && window.Blob) {
-  // Great success! All the File APIs are supported.
 } else {
   alert('The File APIs are not fully supported in this browser.');
 }
 var viewIndex =0;
 var maxImage =4;
+
 	function refreshImage(name, src) {
 		var c = document.getElementById(name);
 		var ctx = c.getContext("2d");
-		console.log(src);
-		console.log(viewIndex);
 		var img = src;
 		
 		ctx.drawImage(img, 0, 0,ctx.canvas.width, ctx.canvas.height);
 	}
+	
 	function readSub(index,obj){
 		var reader = new FileReader();
 		reader.onload = function(e) {
@@ -30,6 +28,7 @@ var maxImage =4;
 		}	
 		reader.readAsDataURL(obj);
 	}
+	
 	function readURL(input,name) {
 		
 		if (input.files && input.files[0]) {
@@ -41,7 +40,8 @@ var maxImage =4;
 		}
 	}
 	
-	      </script>
+	var templateImageViewer = '<div class="imageViewer"><canvas id="view{{index}}" class="vcanvas" ></canvas></div>'
+</script>
 <style>
 .imageViewer {
 	float: left;
@@ -55,35 +55,40 @@ var maxImage =4;
 	margin-bottom: 10px;
 }
 .imageViewer canvas {
+}
+.container{
+	width : 700px;
+	height :600px;
+	float:left;
+}
+.vcanvas{
 	background: #ddd;
 	border: 1px solid #aaa;
+	width:150px;
+	height:150px;
+}
+#dragoverview{
+	position:absoulte;
+	dispay:none;
+}
+.layoutright{
+	float:left;
 }
 </style>
 <body>
-<input type="file" id="inputbox" name="view1" onchange="readURL(this)" multiple="multiple"/> <br />
 <div class="container" id="drop_zone">
-	<div class="imageViewer">		
-		<canvas id="view1" width="250" height="250">
-Your browser does not support the HTML5 canvas tag.</canvas>
-	</div>
-	
-	<div class="imageViewer">
-		<canvas id="view2" width="250" height="250">
-Your browser does not support the HTML5 canvas tag.</canvas>
-	</div>
-	
-	<div class="imageViewer">
-		<canvas id="view3" width="250" height="250">
-Your browser does not support the HTML5 canvas tag.</canvas>
-	</div>
-	
-	<div class="imageViewer">
-		<canvas id="view4" width="250" height="250">
-Your browser does not support the HTML5 canvas tag.</canvas>
-	</div>
-	</div>
+</div>
+<div class="layoutright"><input type="file" id="inputbox" name="view1" onchange="readURL(this)" multiple="multiple"/> </div>
 </body>
 <script>
+var templateBuffer = '';
+for (var i= 0 ; i < 20;i++){
+	templateBuffer += templateImageViewer.replace('{{index}}',i+1);
+}
+var cont = document.getElementById('drop_zone')
+console.log(cont);
+cont.innerHTML = templateBuffer;
+
 function handleFileSelect(evt) {
     evt.stopPropagation();
     evt.preventDefault();
