@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<script type="text/javascript" src="lib/lib.js"></script>
+<script>
+	if (window.File && window.FileReader && window.FileList && window.Blob) {
+	} else {
+		alert('The File APIs are not fully supported in this browser.');
+	}
+	
+</script>
+<style>
+.imageViewer input {
+	margin-bottom: 10px;
+}
+
+.imageViewer canvas {	
+}
+
+.container {
+	width: 700px;
+	height: 700px;
+	float: left;
+}
+
+.vcanvas {
+	background: #ddd;
+	border: 1px solid #aaa;	
+}
+
+.layoutright {
+	float: left;
+}
+</style>
+<body>
+	<div class="container" id="drop_zone">
+	<div class="imageViewer">
+	<canvas id="view1" class="vcanvas" width="400" height="400"></canvas></div>'
+	</div>
+	<div class="layoutright">
+		<input type="file" id="inputbox" name="view1" onchange="readURL(this)"
+			multiple="multiple" />
+	</div>
+</body>
+<script>
+	var maxImage = 1;
+	var c = document.getElementById('view1');
+	var ctx = c.getContext("2d");
+	var ir = null;
+	var dropZone = document.getElementById('drop_zone')
+ 	var canvasview = document.getElementById('view1')
+ 	var pressed = false;
+	
+	var ImageRect = function()
+	{
+		this.x = 0;
+		this.y = 0;
+		this.width = 0;
+		this.height = 0;
+		this.image = null;
+		this.pressed = false;
+		this.offsetx = 0;
+		this.offsety= 0;
+		this.draw = function()
+		{
+			ctx.drawImage(this.image, this.x,this.y,this.width,this.height);
+		}
+	}
+
+	function refreshImage(name, src) {
+	
+		var img = src;		
+		ir = new ImageRect();
+		ir.x= c.width/4 
+		ir.y = c.height/4
+		ir.width = ctx.canvas.width/2
+		ir.height = ctx.canvas.height/2;
+		ir.image = img;
+		
+		ir.draw();
+	}
+	
+	
+	function canvasMouseUp(evt)
+	{
+		pressed = false;	
+		ir.pressed = false;
+	}
+	
+	function canvasMouseDown(evt)
+	{
+		pressed = true;
+		if (evt.x > ir.x && evt.x < ir.x + ir.width && evt.y > ir.y && evt.y < ir.y + ir.height)
+		{
+			ir.pressed= true;
+			ir.offsetx = ir.x - evt.x;
+			ir.offsety = ir.y - evt.y;
+		}
+	}
+	
+	function canvasMouseOver(evt)
+	{
+		if (ir == null)
+			return;
+		if (pressed)
+		{
+			if (ir.pressed)
+			{
+				ctx.clearRect(ir.x,ir.y,ir.width,ir.height);
+				ir.x = evt.x + ir.offsetx;
+				ir.y = evt.y + ir.offsety;
+				
+				ir.draw();
+			}
+		}
+	}
+	function handleFileSelect(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+
+		var files = evt.dataTransfer.files; // FileList object.
+		readSub(0, files[0]);
+	}
+
+	function handleDragOver(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+		evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+	}
+	
+	// Setup the dnd listeners. 
+	dropZone.addEventListener('dragover', handleDragOver, false);
+	dropZone.addEventListener('drop', handleFileSelect, false);
+	canvasview.addEventListener('mousemove', canvasMouseOver ,false)
+	canvasview.addEventListener('mousedown', canvasMouseDown ,false)
+	canvasview.addEventListener('mouseup', canvasMouseUp ,false)
+	
+</script>
+</html>
+
