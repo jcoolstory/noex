@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html>
+<script src="./lib/jquery-1.11.2.js"></script>
 <script>
 if (window.File && window.FileReader && window.FileList && window.Blob) {
 } else {
@@ -39,8 +40,18 @@ var maxImage =4;
 			}			
 		}
 	}
-	
 	var templateImageViewer = '<div class="imageViewer"><canvas id="view{{index}}" class="vcanvas" ></canvas></div>'
+	var dpopupswitch = false;
+	function toggleDragpopup(){
+		if (dpopupswitch == false)
+			$('#droppopup').show();
+		else
+			$('#droppopup').hide();
+	}
+	
+	$(document).read(function(){
+		
+	});
 </script>
 <style>
 .imageViewer {
@@ -76,6 +87,9 @@ var maxImage =4;
 }
 </style>
 <body>
+<div id='droppop' >
+<h1> drop files </h1>
+</div>
 <div class="container" id="drop_zone">
 </div>
 <div class="layoutright"><input type="file" id="inputbox" name="view1" onchange="readURL(this)" multiple="multiple"/> </div>
@@ -101,6 +115,7 @@ function handleFileSelect(evt) {
     evt.stopPropagation();
     evt.preventDefault();
     evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+    toggleDragpopup();
   }
 
   // Setup the dnd listeners.
