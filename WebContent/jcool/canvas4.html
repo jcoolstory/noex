@@ -17,8 +17,8 @@
 }
 
 .container {
-	width: 700px;
-	height: 700px;
+	width: 500px;
+	height: 500px;
 	float: left;
 }
 
@@ -40,8 +40,14 @@
 		<input type="file" id="inputbox" name="view1" onchange="readURL(this)"
 			multiple="multiple" />
 	</div>
+	<br/>
+	<input type='radio' name='dragmode' id='dragmove' value='move' checked/> move
+	<br/>
+	<input type='radio' name='dragmode' id='dragresize' value='resize' /> resize
+	 
 </body>
 <script>
+
 	var maxImage = 1;
 	var c = document.getElementById('view1');
 	var ctx = c.getContext("2d");
@@ -49,9 +55,13 @@
 	var dropZone = document.getElementById('drop_zone')
  	var canvasview = document.getElementById('view1')
  	var pressed = false;
+	var resize = false;
+	var dragmode = "move";
+	var lpx=0;
+	var lpy=0;
 	
-	var ImageRect = function()
-	{
+	var ImageRect = function(){
+		
 		this.x = 0;
 		this.y = 0;
 		this.width = 0;
@@ -60,12 +70,22 @@
 		this.pressed = false;
 		this.offsetx = 0;
 		this.offsety= 0;
-		this.draw = function()
-		{
+		
+		this.draw = function(){
 			ctx.drawImage(this.image, this.x,this.y,this.width,this.height);
 		}
 	}
-
+	
+	function getMode()
+	{
+		if (document.getElementById('dragmove').checked == true)
+			return "move";
+		if (document.getElementById('dragresize').checked == true)
+			return "resize"
+			
+		return "move";
+	}
+	
 	function refreshImage(name, src) {
 	
 		var img = src;		
@@ -79,36 +99,52 @@
 		ir.draw();
 	}
 	
-	
-	function canvasMouseUp(evt)
-	{
+	function canvasMouseUp(evt){
 		pressed = false;	
+		resize = false;
 		ir.pressed = false;
 	}
 	
-	function canvasMouseDown(evt)
-	{
+	function canvasMouseDown(evt){
 		pressed = true;
-		if (evt.x > ir.x && evt.x < ir.x + ir.width && evt.y > ir.y && evt.y < ir.y + ir.height)
-		{
-			ir.pressed= true;
-			ir.offsetx = ir.x - evt.x;
-			ir.offsety = ir.y - evt.y;
+		
+		if (evt.x > ir.x && evt.x < ir.x + ir.width && evt.y > ir.y && evt.y < ir.y + ir.height){
+			dragmode= getMode();
+			
+			if (dragmode == "resize")
+			{
+				resize = true;
+				
+				lpx = evt.x;
+				lpy = evt.y;
+			}
+			else if (dragmode =="move")
+			{
+				ir.pressed= true;
+				ir.offsetx = ir.x - evt.x;
+				ir.offsety = ir.y - evt.y;
+			}
 		}
 	}
 	
-	function canvasMouseOver(evt)
-	{
+	function canvasMouseOver(evt){
 		if (ir == null)
 			return;
-		if (pressed)
-		{
-			if (ir.pressed)
-			{
+		if (pressed){
+			if (ir.pressed){
 				ctx.clearRect(ir.x,ir.y,ir.width,ir.height);
 				ir.x = evt.x + ir.offsetx;
 				ir.y = evt.y + ir.offsety;
 				
+				ir.draw();
+			}
+			if (resize){
+				ctx.clearRect(ir.x,ir.y,ir.width,ir.height);
+				
+				ir.width += (evt.x -lpx );
+				ir.height += (evt.y -lpy );
+				lpx = evt.x;
+				lpy = evt.y;
 				ir.draw();
 			}
 		}
@@ -132,8 +168,7 @@
 	dropZone.addEventListener('drop', handleFileSelect, false);
 	canvasview.addEventListener('mousemove', canvasMouseOver ,false)
 	canvasview.addEventListener('mousedown', canvasMouseDown ,false)
-	canvasview.addEventListener('mouseup', canvasMouseUp ,false)
-	
+	canvasview.addEventListener('mouseup', canvasMouseUp ,false)	
 </script>
 </html>
 
