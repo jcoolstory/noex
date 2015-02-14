@@ -1,0 +1,32 @@
+body{
+	margin: 0;
+}
+.imageViewer input {
+	margin-bottom: 10px;
+}
+
+.imageViewer canvas {	
+}
+
+.container {
+	width: 500px;
+	height: 500px;
+	float: left;
+}
+
+
+.vcanvas {
+	border: 1px solid #aaa;	
+}
+
+.layoutright {
+	float: left;
+}
+#overlayCanvas
+{
+    position:absolute;
+    left:0;
+    top:0;
+    z-index:100;
+    
+}

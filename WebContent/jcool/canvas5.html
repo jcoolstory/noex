@@ -11,8 +11,8 @@
 </script>
 <body>
 	<div class="container" id="drop_zone">
-	<canvas id="view1" class="vcanvas" width="400" height="400"></canvas>
-	<canvas id="overlayCanvas" class="vcanvas" width="400" height="400"></canvas>
+	<div class="imageViewer">
+	<canvas id="view1" class="vcanvas" width="400" height="400"></canvas></div>'
 	</div>
 	<div class="layoutright">
 		<input type="file" id="inputbox" name="view1" onchange="readURL(this)"
@@ -23,22 +23,20 @@
 	<br/>
 	<input type='radio' name='dragmode' id='dragresize' value='resize' /> resize
 	 <br/>
-	<input type='radio' name='dragmode' id='drawline' value='line'/> line
+	<input type='radio' name='dragmode' id='drawline' value='line' checked/> line
 	<br/>
-	<input type='radio' name='dragmode' id='drawrect' value='rect'/> rect
+	<input type='radio' name='dragmode' id='drawrect' value='rect' checked/> rect
 	<br/>
 </body>
 <script>
 	var maxImage = 1;
 	var c = document.getElementById('view1');
-	var oC = document.getElementById('overlayCanvas');
-	var octx = oC.getContext("2d");
 	var ctx = c.getContext("2d");
 	var ir = null;
 	var dropZone = document.getElementById('drop_zone')
+ 	var canvasview = document.getElementById('view1')
  	var pressed = false;
 	var resize = false;
-	var isDrawing = false;
 	var dragmode = "move";
 	var lpx=0;
 	var lpy=0;
@@ -66,12 +64,6 @@
 		if (document.getElementById('dragresize').checked == true)
 			return "resize"
 			
-			
-		if (document.getElementById('drawline').checked == true)
-			return "line"
-		if (document.getElementById('drawrect').checked == true)
-			return "rect"
-			
 		return "move";
 	}
 	
@@ -89,80 +81,35 @@
 	}
 	
 	function canvasMouseUp(evt){
-
-		if (isDrawing == "rect")
-			octx.clearRect(0,0,oC.width,oC.height);
-
 		pressed = false;	
 		resize = false;
 		if (ir !=null)
 			ir.pressed = false;
-		isDrawing = false;
 	}
 	
 	function canvasMouseDown(evt){
 		pressed = true;
-		dragmode= getMode();
-
-		switch(dragmode){
-		case "line":
-			lpx = evt.x;
-			lpy = evt.y;
-			isDrawing = "line";
-			break;
-		case "rect":
-			lpx = evt.x;
-			lpy = evt.y;
-			isDrawing = "rect";
-			break;
-		}
 		
 		if (ir !=null && evt.x > ir.x && evt.x < ir.x + ir.width && evt.y > ir.y && evt.y < ir.y + ir.height){
-						
-			switch (dragmode){
-			case "resize":
+			dragmode= getMode();
+			
+			if (dragmode == "resize")
+			{
 				resize = true;
+				
 				lpx = evt.x;
 				lpy = evt.y;
-				
-				break;
-			case "move":
+			}
+			else if (dragmode =="move")
+			{
 				ir.pressed= true;
 				ir.offsetx = ir.x - evt.x;
 				ir.offsety = ir.y - evt.y;
-
-				break;
 			}
 		}
 	}
 	
 	function canvasMouseOver(evt){
-		
-		if (isDrawing != false){
-			switch(isDrawing){
-			case "line":
-				octx.strokeStyle = 'rgba(255,0,0,1)';
-				octx.lineWidth = 0.5;
-				octx.clearRect(0,0,oC.width,oC.height);
-				octx.beginPath();
-				octx.moveTo(lpx, lpy);
-				octx.lineTo(evt.x, evt.y);
-				octx.stroke();
-				break;
-			case "rect":
-				octx.strokeStyle = 'rgba(255,0,0,1)';
-				octx.fillStyle = 'rgba(0,0,255,0.3)'
-				octx.lineWidth = 0.7;
-				octx.clearRect(0,0,oC.width,oC.height);
-				octx.beginPath();
-				octx.fillRect(lpx,lpy,evt.x-lpx,evt.y-lpy);
-				octx.rect(lpx,lpy,evt.x-lpx,evt.y-lpy);
-				
-				octx.stroke();
-				break;
-			}
-		}
-		
 		if (ir == null)
 			return;
 		if (pressed){
@@ -201,9 +148,9 @@
 	// Setup the dnd listeners. 
 	dropZone.addEventListener('dragover', handleDragOver, false);
 	dropZone.addEventListener('drop', handleFileSelect, false);
-	dropZone.addEventListener('mousemove', canvasMouseOver ,false)
-	dropZone.addEventListener('mousedown', canvasMouseDown ,false)
-	dropZone.addEventListener('mouseup', canvasMouseUp ,false)	
+	canvasview.addEventListener('mousemove', canvasMouseOver ,false)
+	canvasview.addEventListener('mousedown', canvasMouseDown ,false)
+	canvasview.addEventListener('mouseup', canvasMouseUp ,false)	
 </script>
 </html>
 
