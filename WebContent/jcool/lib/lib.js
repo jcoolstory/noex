@@ -23,3 +23,28 @@ function readURL(input, name) {
 		}
 	}
 }
+
+var Rectangle = function(){
+	this.x = 0;
+	this.y = 0;
+	this.width = 1;
+	this.height = 1;
+}
+
+
+var ImageRect = function(){
+	
+	this.x = 0;
+	this.y = 0;
+	this.width = 0;
+	this.height = 0;
+	this.image = null;
+	this.pressed = false;
+	this.offsetx = 0;
+	this.offsety= 0;
+	
+	this.draw = function(){
+		ctx.drawImage(this.image, this.x,this.y,this.width,this.height);
+	}
+}
+
