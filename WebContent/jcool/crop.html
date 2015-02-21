@@ -27,6 +27,27 @@
 		ir.draw();
 		octx.clearRect(0,0,oC.width,oC.height);
 	}
+	
+	function reflectionImage(){
+		if (ir == null)
+			return;
+			
+		ctx.translate(0, c.height);
+        ctx.scale(1, -1);
+		ctx.drawImage(ir.image, 0,0,ir.image.width,ir.image.height,0,0,c.width,c.height);
+		
+	}
+	
+	function reflectionHorizon(){
+		if (ir == null)
+			return;
+			
+		ctx.translate(c.width, 0);
+        ctx.scale(-1, 1);
+		ctx.drawImage(ir.image, 0,0,ir.image.width,ir.image.height,0,0,c.width,c.height);
+		
+	}
+	
 </script>
 </head>
 <body>
@@ -40,6 +61,8 @@
 			multiple="multiple" />
 		<p><button onclick="imagecrop()">Crop</button></p>
 		<p><button onclick="imageorigin()">Origin</button></p>
+		<p><button onclick="reflectionImage()">Flip Vertical</button></p>
+		<p><button onclick="reflectionHorizon()">Flip Horizon</button></p>
 	</div>
 	<br/>
 	
