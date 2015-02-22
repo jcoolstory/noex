@@ -29,8 +29,7 @@ var Rectangle = function(){
 	this.y = 0;
 	this.width = 1;
 	this.height = 1;
-}
-
+};
 
 var ImageRect = function(){
 	
@@ -45,6 +44,6 @@ var ImageRect = function(){
 	
 	this.draw = function(){
 		ctx.drawImage(this.image, this.x,this.y,this.width,this.height);
-	}
-}
+	};
+};
 
