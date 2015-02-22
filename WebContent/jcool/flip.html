@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<script type="text/javascript" src="lib/lib.js"></script>
+
+<link rel="stylesheet" href="lib/canvas.css">
+<script>
+	if (window.File && window.FileReader && window.FileList && window.Blob) {
+	} else {
+		alert('The File APIs are not fully supported in this browser.');
+	}
+	function imagecrop(){
+		if (ir == null)
+			return;
+		
+		var xd = cropRect.x / ir.image.width;
+		var srcX,srcY,srcW,srcH;
+		ctx.drawImage(ir.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
+		octx.clearRect(0,0,oC.width,oC.height);
+	}
+	
+	function imageorigin(){
+	
+		if (ir == null)
+			return;
+		ir.draw();
+		octx.clearRect(0,0,oC.width,oC.height);
+	}
+	
+	function reflectionImage(){
+		if (ir == null)
+			return;
+			
+		ctx.translate(0, c.height);
+        ctx.scale(1, -1);
+		ctx.drawImage(ir.image, 0,0,ir.image.width,ir.image.height,0,0,c.width,c.height);
+		
+	}
+	
+	function reflectionHorizon(){
+		if (ir == null)
+			return;
+			
+		ctx.translate(c.width, 0);
+        ctx.scale(-1, 1);
+		ctx.drawImage(ir.image, 0,0,ir.image.width,ir.image.height,0,0,c.width,c.height);
+		
+	}
+	
+</script>
+</head>
+<body>
+	<div class="container" id="drop_zone">
+	<canvas id="view1" class="vcanvas" width="600" height="600"></canvas>
+	<canvas id="overlayCanvas" class="vcanvas" width="600" height="600"></canvas>
+	</div>
+	<div class="layoutright">
+		<h1> crop</h1>
+		<input type="file" id="inputbox" name="view1" onchange="readURL(this)"
+			multiple="multiple" />
+		<p><button onclick="imagecrop()">Crop</button></p>
+		<p><button onclick="imageorigin()">Origin</button></p>
+		<p><button onclick="reflectionImage()">Flip Vertical</button></p>
+		<p><button onclick="reflectionHorizon()">Flip Horizon</button></p>
+	</div>
+	<br/>
+	
+</body>
+<script>
+	var maxImage = 1;
+	var c = document.getElementById('view1');
+	var oC = document.getElementById('overlayCanvas');
+	var octx = oC.getContext("2d");
+	var ctx = c.getContext("2d");
+	var ir = null;
+	var dropZone = document.getElementById('drop_zone')
+ 	var pressed = false;
+	var dragmode = "move";
+	var lpx=0;
+	var lpy=0;
+
+	var maskCanvas = document.createElement('canvas');
+	maskCanvas.width = oC.width;
+	maskCanvas.height = oC.height;
+	var maskCtx = maskCanvas.getContext('2d');
+	var cropRect = new Rectangle();
+	
+	function refreshImage(name, src) {
+	
+		var img = src;		
+		ir = new ImageRect();
+		ir.x= 0;
+		ir.y = 0;
+		ir.width = ctx.canvas.width;
+		ir.height = ctx.canvas.height;
+		ir.image = img;
+		
+		ir.draw();
+	}
+	function canvasMouseUp(evt){
+
+		pressed = false;	
+		if (ir !=null)
+			ir.pressed = false;
+	}
+	
+	function canvasMouseDown(evt){
+		pressed = true;	
+		lpx = evt.x;
+		lpy = evt.y;
+	}
+	
+	function canvasMouseOver(evt){
+		
+		if (!pressed)
+			return;
+			
+		octx.strokeStyle = 'rgba(255,0,0,1)';
+		octx.fillStyle = 'rgba(150,150,255,0.3)'
+		octx.lineWidth = 1;
+		octx.clearRect(0,0,oC.width,oC.height);
+		octx.beginPath();
+		
+		var px = evt.x;
+		var py = evt.y;
+		if (px > c.width){
+			px = c.width;
+		}		
+		if (py > c.height){					
+			py = c.height;
+		}		
+		if (px < 0){
+			px = 0;
+		}		
+		if (py <0){
+			py = 0;
+		}		
+		px = px-lpx;
+		py = py-lpy;
+		if (ir != null)
+		{
+			cropRect.x = lpx/c.width * ir.image.width;
+			cropRect.y = lpy/c.height * ir.image.height;
+			cropRect.width = px/c.width * ir.image.width;
+			cropRect.height = py/c.height * ir.image.height;
+		}
+		maskCtx.clearRect(0,0,c.width,c.height);
+		
+		maskCtx.globalCompositeOperation = "source-over"
+		maskCtx.fillStyle ='rgba(30,30,30,0.8)'
+		maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+		maskCtx.globalCompositeOperation = 'destination-out';
+		maskCtx.fillStyle = "blue";
+		
+		maskCtx.fillRect(lpx,lpy,px,py);
+		octx.drawImage(maskCanvas, 0, 0);
+		octx.strokeStyle = "lime"
+		octx.rect(lpx,lpy,px,py);
+		
+		octx.stroke();
+	}
+	function handleFileSelect(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+
+		var files = evt.dataTransfer.files; // FileList object.
+		readSub(0, files[0]);
+	}
+
+	function handleDragOver(evt) {
+		evt.stopPropagation();
+		evt.preventDefault();
+		evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+	}
+	
+	// Setup the dnd listeners. 
+	dropZone.addEventListener('dragover', handleDragOver, false);
+	dropZone.addEventListener('drop', handleFileSelect, false);
+	dropZone.addEventListener('mousemove', canvasMouseOver ,false)
+	dropZone.addEventListener('mousedown', canvasMouseDown ,false)
+	dropZone.addEventListener('mouseup', canvasMouseUp ,false)	
+</script>
+</html>
+
