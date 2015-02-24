@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<style>
+*{padding:0; margin:0}
+</style>
+<script type="text/javascript">
+var canvasApp = function(){
+	//canvas
+	var dragCanvas = document.getElementById("dragDraw");
+	var dragCtx = dragCanvas.getContext("2d");
+	var maskCanvas = document.createElement("canvas");
+	var maskCtx = maskCanvas.getContext("2d");
+	maskCanvas.id = "maskFill";
+	maskCanvas.width = dragCanvas.width;
+	maskCanvas.height = dragCanvas.height;
+	var imgCanvas = document.createElement("canvas");
+	var imgCtx = imgCanvas.getContext("2d");
+	imgCanvas.id = "ImgDraw";
+	//temp
+	imgCanvas.width = dragCanvas.width;
+	imgCanvas.height = dragCanvas.height;
+	imgCanvas.style.position = "absolute";
+	imgCanvas.style.left = "0";
+	imgCanvas.style.top = "0";
+	
+	//temp2
+	ghostCanvas = document.createElement("canvas");
+	gctx = ghostCanvas.getContext("2d");
+	ghostCanvas.width = dragCanvas.width;
+	ghostCanvas.height = dragCanvas.height;
+	
+	
+	//position
+	var dragWidth = 0;
+	var dragHeight = 0;
+	var upX = 0;
+	var upY = 0;
+	var downX = 0;
+	var downY = 0;
+	var dragX = 0;
+	var dragY = 0;
+	var offsetX = 0;
+	var offsetY = 0;
+
+	//etc
+	var isSelect = null;
+	var isDrag = false;
+	var rectes = [];
+	var lineColor = "rgba(255, 0, 0, 1)";
+	
+	//temp
+	var imgObj = new Image();
+	imgObj.src = "http://localhost:8080/jcool/img_the_scream.jpg";
+	
+	//함수 시작
+	var dragRect = function(){
+		this.x = 0;
+		this.y = 0;
+		this.w = 1;
+		this.h = 1;
+		this.fill = "rgba(0, 0, 0, 1)";
+	},
+	
+	selectRect = function(x, y, w, h, fill){
+		var rect = new dragRect();
+		rect.x = x;
+		rect.y = y;
+		rect.w = w;
+		rect.h = h;
+		rect.fill = fill;
+		rectes.push(rect);
+	},
+	
+	//선택된 셀렉트
+	selectDown = function(e){
+		clear(gctx);
+		selectShape(gctx, rectes[0], "white");
+		offsetX = e.layerX;
+		offsetY = e.layerY;
+		
+			dragCanvas.removeEventListener("mousedown", lineDown, false);
+			
+			offSetX = offsetX - downX;
+			offSetY = offsetY - downY;
+			dragWidth;
+			dragHeight;
+			
+			dragCanvas.addEventListener("mousemove", selectMove, false);
+			
+			clear(gctx);
+
+			return;
+		
+		
+	},
+	selectUp = function(e){
+		
+	},
+	selectMove = function(e){
+		
+	},
+	selectShape = function(context, shape, fill){
+		try{
+			context.fillStyle = fill;
+			if(shape.x > dragCanvas.width || shape.y > dragCanvas.height) return;
+			if(shape.x + shape.w < 0 || shape.y + shape.h < 0) return;		
+			context.fillRect(shape.x, shape.y, shape.w, shape.h);
+			console.log("shape.x" + shape.x + "\n" +
+					"shape.y" + shape.y + "\n" +
+					"shape.w" + shape.w + "\n" +
+					"shape.h" + shape.h
+			)
+		}catch(e){}
+		
+	},
+	
+	//선긋기
+	lineDown = function(e){
+		downX = e.layerX;
+		downY = e.layerY;
+		
+		vertex(downX, downY);
+		
+		clear(dragCtx);
+		
+		isDrag = true;
+		if(isDrag){
+			window.addEventListener("mousemove", lineMove, false);
+		}
+		dragCanvas.removeEventListener("mousedown", lineDown, false);
+		window.addEventListener("mouseup", lineUp, false);
+		
+	},
+	lineUp = function(e){
+		upX = e.layerX;
+		upY = e.layerY;
+		if(downX  != upX)
+			vertex(upX, upY);
+		
+		dragCanvas.addEventListener("mousedown", lineDown, false);
+		window.removeEventListener("mouseup", lineUp, false);
+		if(isDrag){
+			isDrag = false;
+			window.removeEventListener("mousemove", lineMove, false);
+		}
+		selectRect(downX, downY, downX + upX, downY + upY, "white");
+	},
+	lineMove = function(e){
+		var moveX = e.layerX;
+		var moveY = e.layerY;
+		dragWidth = moveX - downX;
+		dragHeight = moveY - downY;
+		dragCtx.canvas.width = dragCtx.canvas.width;
+		
+		vertex(downX, downY);
+		
+		mask(downX, downY, dragWidth, dragHeight);
+		
+		dragCtx.strokeStyle = lineColor;
+		dragCtx.strokeRect(downX, downY, dragWidth, dragHeight);
+		dragCtx.rect(downX, downY, dragWidth, dragHeight);
+	},
+	vertex = function(x, y){
+		dragCtx.beginPath();
+		dragCtx.arc(x, y, 2, 0, 2 * Math.PI, true);
+		dragCtx.fillStyle = lineColor;
+		dragCtx.fill();
+	},
+	
+	//etc
+	clear = function(c){
+		c.clearRect(0, 0, dragCanvas.width, dragCanvas.height);
+	},
+	mask = function(x, y, w, h){
+		clear(maskCtx);
+		maskCtx.globalCompositeOperation = "source-over";
+		maskCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
+		maskCtx.fillRect(0, 0, dragCanvas.width, dragCanvas.height);
+		maskCtx.globalCompositeOperation = "destination-out";
+		maskCtx.fillStyle =  "white";
+		maskCtx.fillRect(x, y, w, h);
+		dragCtx.drawImage(maskCanvas, 0, 0);
+		dragCtx.rect(x, y, w, h);
+	},
+	
+	init = function(){
+		//temp 이미지 호출
+		document.body.appendChild(imgCanvas);
+		imgObj.addEventListener("load",function(){
+			 imgCtx.drawImage(imgObj, 0, 0);
+		}, false);
+		dragCanvas.addEventListener("mousedown", lineDown, false);
+		dragCanvas.addEventListener("mousedown", selectDown, false);
+		//selectRect(downX, downY, downX + upX, downY + upY, "white");
+	}
+	init();
+}
+window.addEventListener("load", canvasApp, false);
+</script>
+</head>
+<body>
+<canvas id="dragDraw" width="500" height="500" style="position:relative; border:1px solid #ccc; z-index:10"></canvas>
+
+</body>
+</html>
