@@ -199,7 +199,6 @@
 	    		  imgData: dataURL
 	    	  },
 			  success : function (data) {
-		        // 서버에서 Return된 값으로 중복 여부를 사용자에게 알려줍니다.
 		        if (data) {
 		        	var gl = document.getElementById('gallery');
 		        	gl.innerHTML = '<img src="' + data+'"/>'; 

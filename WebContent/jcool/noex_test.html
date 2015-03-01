@@ -20,9 +20,11 @@
 		<h3><span id="infomation"></span></h3>
 		<input type="file" id="inputbox" name="view1" onchange="readURL(this)"
 			multiple="multiple" />
+		<p>	<input type='radio' name='scalemode' id='scalefit' value='fit'/ checked> autofit
+		<input type='radio' name='scalemode' id='scaleorigin' value='origin'/> 1:1</p>
 		<p><button onclick="imagecrop()">Crop</button></p>
 		<p><button onclick="imageorigin()">Origin</button></p>
-		<p><button onclick="reflectionImage()">Flip Vertical</button></p>
+		<p><button onclick="reflectionVertical()">Flip Vertical</button></p>
 		<p><button onclick="reflectionHorizon()">Flip Horizon</button></p>
 		<p><a href="#" id='saveFile' onclick="saveFile()" download="custom-filename.png">Save</a></p>
 	</div>
@@ -42,12 +44,8 @@
 	var dragmode = "move";
 	var lpx=0;
 	var lpy=0;
-	var maskCanvas = document.createElement('canvas');
-	var maskCtx = maskCanvas.getContext('2d');
 	var cropRect = new Rectangle();
 	var dragged = false
-	maskCanvas.width = oC.width;
-	maskCanvas.height = oC.height;
 	
 	function refreshImage(name, src) {
 	
@@ -59,8 +57,33 @@
 		ir.height = ctx.canvas.height;
 		ir.image = img;
 		infomationText.innerHTML = 'width : ' + ir.image.width +' px <br/>height : ' + ir.image.height + ' px'; 
-		ir.draw();
+		DrawImage(ir);
 	}
+	
+	function DrawImage(image)
+	{
+		if (getMode() == 'fit')
+			ir.draw();
+		else
+		{
+			ctx.fillStyle = "#000000"
+			ctx.fillRect(0,0,c.width,c.height);
+			var offsetx = (c.width - image.image.width)/2;
+			var offsety = (c.height - image.image.height)/2;
+			ctx.drawImage(image.image, image.x,image.y,image.width,image.height,offsetx,offsety,image.width,image.height);
+		}
+	}
+	
+	function getMode()
+	{
+		if (document.getElementById('scalefit').checked == true)
+			return "fit";
+		if (document.getElementById('scaleorigin').checked == true)
+			return "origin"
+			
+		return "fit";
+	}
+	
 	function canvasMouseUp(evt){
 
 		pressed = false;
@@ -83,12 +106,8 @@
 			return;
 		dragged = true;
 		
-		octx.strokeStyle = 'rgba(255,0,0,1)';
-		octx.fillStyle = 'rgba(150,150,255,0.3)'
-		octx.lineWidth = 1;
-		octx.clearRect(0,0,oC.width,oC.height);
-		octx.beginPath();
 		
+		// select가 허용범위보다 크거나 작은것을 방
 		var px = evt.x;
 		var py = evt.y;
 		if (px > c.width){
@@ -112,20 +131,25 @@
 			cropRect.width = px/c.width * ir.image.width;
 			cropRect.height = py/c.height * ir.image.height;
 		}
-		maskCtx.clearRect(0,0,c.width,c.height);
+
+		octx.clearRect(0,0,c.width,c.height);
+		octx.fillStyle ='rgba(30,30,30,0.8)'
+		octx.fillRect(0, 0, oC.width, oC.height);
+		octx.globalCompositeOperation = 'destination-out';
+		octx.fillStyle = "black";
+		octx.fillRect(lpx,lpy,px,py);
 		
-		maskCtx.globalCompositeOperation = "source-over"
-		maskCtx.fillStyle ='rgba(30,30,30,0.8)'
-		maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
-		maskCtx.globalCompositeOperation = 'destination-out';
-		maskCtx.fillStyle = "blue";
-		
-		maskCtx.fillRect(lpx,lpy,px,py);
-		octx.drawImage(maskCanvas, 0, 0);
+		octx.strokeStyle = 'rgba(255,0,0,1)';
+		octx.fillStyle = 'rgba(150,150,255,0.3)'
+		octx.lineWidth = 1;
+	
+		octx.globalCompositeOperation = "source-over"
 		octx.strokeStyle = "lime"
 		octx.rect(lpx,lpy,px,py);
 		
 		octx.stroke();
+		octx.beginPath();
+		
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	}
 	
@@ -135,19 +159,29 @@
 		
 		var xd = cropRect.x / ir.image.width;
 		var srcX,srcY,srcW,srcH;
-		ctx.drawImage(ir.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
-		octx.clearRect(0,0,oC.width,oC.height);
+		if (getMode() == 'fit'){
+			ctx.drawImage(ir.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
+			octx.clearRect(0,0,oC.width,oC.height);
+		}
+		else{
+			ctx.fillRect(0,0,c.width,c.height);
+			var offsetx = (c.width - cropRect.width)/2;
+			var offsety = (c.height - cropRect.height)/2;
+			ctx.drawImage(ir.image, cropRect.x+50,cropRect.y+50,cropRect.width,cropRect.height,offsetx,offsety,cropRect.width,cropRect.height);
+			octx.clearRect(0,0,oC.width,oC.height);
+		}
 	}
 	
 	function imageorigin(){
 	
 		if (ir == null)
 			return;
-		ir.draw();
+		DrawImage(ir);
+
 		octx.clearRect(0,0,oC.width,oC.height);
 	}
 	
-	function reflectionImage(){
+	function reflectionVertical(){
 		if (ir == null)
 			return;
 			
@@ -178,14 +212,14 @@
 		evt.stopPropagation();
 		evt.preventDefault();
 
-		var files = evt.dataTransfer.files; // FileList object.
+		var files = evt.dataTransfer.files;
 		readSub(0, files[0]);
 	}
 
 	function handleDragOver(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
-		evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
+		evt.dataTransfer.dropEffect = 'copy';
 	}
 	
 	// Setup the dnd listeners. 
