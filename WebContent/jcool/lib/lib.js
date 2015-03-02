@@ -29,6 +29,19 @@ var Rectangle = function(){
 	this.y = 0;
 	this.width = 1;
 	this.height = 1;
+	this.contains = function(ox,oy){
+		if(typeof oy == "undefined") {
+
+			return (ox.x > this.x && 
+					ox.x < this.x + this.width && 
+					ox.y > this.y && 
+					ox.y < this.y + this.height);
+		}
+		return (ox > this.x && 
+				ox < this.x + this.width && 
+				oy > this.y && 
+				oy < this.y + this.height);
+	};
 };
 
 var ImageRect = function(){
@@ -38,7 +51,6 @@ var ImageRect = function(){
 	this.width = 0;
 	this.height = 0;
 	this.image = null;
-	this.pressed = false;
 	this.offsetx = 0;
 	this.offsety= 0;
 	

@@ -38,32 +38,35 @@
 	var oC = document.getElementById('overlayCanvas');
 	var octx = oC.getContext("2d");
 	var ctx = c.getContext("2d");
-	var ir = null;
-	var dropZone = document.getElementById('drop_zone')
+	var srcImg = null;
+	
  	var pressed = false;
 	var dragmode = "move";
 	var lpx=0;
 	var lpy=0;
 	var cropRect = new Rectangle();
-	var dragged = false
+	var dragged = false;
+
+	var selectedRect = false;
+	var selectRect = new Rectangle();
 	
 	function refreshImage(name, src) {
 	
 		var img = src;		
-		ir = new ImageRect();
-		ir.x= 0;
-		ir.y = 0;
-		ir.width = ctx.canvas.width;
-		ir.height = ctx.canvas.height;
-		ir.image = img;
-		infomationText.innerHTML = 'width : ' + ir.image.width +' px <br/>height : ' + ir.image.height + ' px'; 
-		DrawImage(ir);
+		srcImg = new ImageRect();
+		srcImg.x= 0;
+		srcImg.y = 0;
+		srcImg.width = ctx.canvas.width;
+		srcImg.height = ctx.canvas.height;
+		srcImg.image = img;
+		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
+		DrawImage(srcImg);
 	}
 	
 	function DrawImage(image)
 	{
 		if (getMode() == 'fit')
-			ir.draw();
+			srcImg.draw();
 		else
 		{
 			ctx.fillStyle = "#000000"
@@ -87,17 +90,18 @@
 	function canvasMouseUp(evt){
 
 		pressed = false;
-		if (ir !=null)
-			ir.pressed = false;
 		if (!dragged)
 			octx.clearRect(0,0,oC.width,oC.height);
 		dragged = false;
+		selectedRect = false;
 	}
-	
 	function canvasMouseDown(evt){
 		pressed = true;	
 		lpx = evt.x;
 		lpy = evt.y;
+		if (selectRect.contains(evt)){
+			selectedRect = true;
+		}
 	}
 	
 	function canvasMouseOver(evt){
@@ -105,102 +109,123 @@
 		if (!pressed)
 			return;
 		dragged = true;
-		
-		
-		// select가 허용범위보다 크거나 작은것을 방
-		var px = evt.x;
-		var py = evt.y;
-		if (px > c.width){
-			px = c.width;
-		}		
-		if (py > c.height){					
-			py = c.height;
-		}		
-		if (px < 0){
-			px = 0;
-		}		
-		if (py < 0){
-			py = 0;
-		}		
-		px = px-lpx;
-		py = py-lpy;
-		if (ir != null)
+		if (selectedRect)
 		{
-			cropRect.x = lpx/c.width * ir.image.width;
-			cropRect.y = lpy/c.height * ir.image.height;
-			cropRect.width = px/c.width * ir.image.width;
-			cropRect.height = py/c.height * ir.image.height;
+			selectRect.x -= (lpx-evt.x);
+			selectRect.y -= (lpy-evt.y);
+				
+			lpx = evt.x;
+			lpy = evt.y;
 		}
+		else
+		{
+			// select가 허용범위보다 크거나 작은것을 방
+			var px = evt.x;
+			var py = evt.y;
+			if (px > c.width){
+				px = c.width;
+			}		
+			if (py > c.height){					
+				py = c.height;
+			}		
+			if (px < 0){
+				px = 0;
+			}		
+			if (py < 0){
+				py = 0;
+			}		
+			px = px-lpx;
+			py = py-lpy;
+			
+			
+			selectRect.x = lpx;
+			selectRect.y = lpy;
+			selectRect.width = px;
+			selectRect.height = py;
+			
+		}
+		if (srcImg != null)
+		{
+			cropRect.x = selectRect.x/c.width * srcImg.image.width;
+			cropRect.y = selectRect.y/c.height * srcImg.image.height;
+			cropRect.width = selectRect.width/c.width * srcImg.image.width;
+			cropRect.height = selectRect.height/c.height * srcImg.image.height;
+		}
+		
+		drawSelection(selectRect);
+		
+		
 
+		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
+		
+	}
+	function drawSelection(sRect){
+		
 		octx.clearRect(0,0,c.width,c.height);
 		octx.fillStyle ='rgba(30,30,30,0.8)'
 		octx.fillRect(0, 0, oC.width, oC.height);
 		octx.globalCompositeOperation = 'destination-out';
 		octx.fillStyle = "black";
-		octx.fillRect(lpx,lpy,px,py);
+		octx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);
 		
-		octx.strokeStyle = 'rgba(255,0,0,1)';
-		octx.fillStyle = 'rgba(150,150,255,0.3)'
 		octx.lineWidth = 1;
 	
 		octx.globalCompositeOperation = "source-over"
 		octx.strokeStyle = "lime"
-		octx.rect(lpx,lpy,px,py);
+		octx.rect(sRect.x,sRect.y,sRect.width,sRect.height);
 		
 		octx.stroke();
 		octx.beginPath();
-		
-		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
+
 	}
-	
 	function imagecrop(){
-		if (ir == null)
+		if (srcImg == null)
 			return;
 		
-		var xd = cropRect.x / ir.image.width;
+		var xd = cropRect.x / srcImg.image.width;
 		var srcX,srcY,srcW,srcH;
 		if (getMode() == 'fit'){
-			ctx.drawImage(ir.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
+			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
 			octx.clearRect(0,0,oC.width,oC.height);
 		}
 		else{
 			ctx.fillRect(0,0,c.width,c.height);
 			var offsetx = (c.width - cropRect.width)/2;
 			var offsety = (c.height - cropRect.height)/2;
-			ctx.drawImage(ir.image, cropRect.x+50,cropRect.y+50,cropRect.width,cropRect.height,offsetx,offsety,cropRect.width,cropRect.height);
+			ctx.drawImage(srcImg.image, cropRect.x+50,cropRect.y+50,cropRect.width,cropRect.height,offsetx,offsety,cropRect.width,cropRect.height);
 			octx.clearRect(0,0,oC.width,oC.height);
 		}
 	}
 	
 	function imageorigin(){
 	
-		if (ir == null)
+		if (srcImg == null)
 			return;
-		DrawImage(ir);
+		DrawImage(srcImg);
 
 		octx.clearRect(0,0,oC.width,oC.height);
 	}
 	
 	function reflectionVertical(){
-		if (ir == null)
+		if (srcImg == null)
 			return;
 			
 		ctx.translate(0, c.height);
         ctx.scale(1, -1);
-		ctx.drawImage(ir.image, 0,0,ir.image.width,ir.image.height,0,0,c.width,c.height);		
+		ctx.drawImage(srcImg.image, 0,0,srcImg.image.width,srcImg.image.height,0,0,c.width,c.height);		
 	}
 	
 	function reflectionHorizon(){
-		if (ir == null)
+		if (srcImg == null)
 			return;
 			
 		ctx.translate(c.width, 0);
         ctx.scale(-1, 1);
-		ctx.drawImage(ir.image, 0,0,ir.image.width,ir.image.height,0,0,c.width,c.height);
+		ctx.drawImage(srcImg.image, 0,0,srcImg.image.width,srcImg.image.height,0,0,c.width,c.height);
 	}
 	
 	function saveFile(){
-		if (ir == null)
+		if (srcImg == null)
 			return;
 		
 		var dataURL = c.toDataURL('image/png');
@@ -221,7 +246,7 @@
 		evt.preventDefault();
 		evt.dataTransfer.dropEffect = 'copy';
 	}
-	
+	var dropZone = document.getElementById('drop_zone')
 	// Setup the dnd listeners. 
 	dropZone.addEventListener('dragover', handleDragOver, false);
 	dropZone.addEventListener('drop', handleFileSelect, false);
