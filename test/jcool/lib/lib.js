@@ -1,6 +1,5 @@
 var viewIndex = 0;
 
-
 function readSub(index, obj) {
 	var reader = new FileReader();
 	reader.onload = function(e) {
@@ -14,7 +13,20 @@ function readSub(index, obj) {
 	reader.readAsDataURL(obj);
 }
 
-function readURL(input, name) {
+function readImage(index, obj,func) {
+	var reader = new FileReader();
+	reader.onload = function(e) {
+		img = new Image();
+		img.src = URL.createObjectURL(obj);
+		img.onload = function() {
+			func("view" + (viewIndex + 1), this);
+			viewIndex++;
+		};
+	};
+	reader.readAsDataURL(obj);
+}
+
+function readInput(input) {
 	if (input.files && input.files[0]) {
 		var length = input.files.length > maxImage ? maxImage
 				: input.files.length;
@@ -29,6 +41,12 @@ var Rectangle = function(){
 	this.y = 0;
 	this.width = 1;
 	this.height = 1;
+	this.reset = function()	{
+		this.x = 0;
+		this.y = 0;
+		this.width = 0;
+		this.height = 0;	
+	};
 	this.contains = function(ox,oy){
 		if(typeof oy == "undefined") {
 
@@ -51,8 +69,6 @@ var ImageRect = function(){
 	this.width = 0;
 	this.height = 0;
 	this.image = null;
-	this.offsetx = 0;
-	this.offsety= 0;
 	
 	this.draw = function(){
 		ctx.drawImage(this.image, this.x,this.y,this.width,this.height);

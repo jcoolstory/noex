@@ -18,7 +18,7 @@
 	</div>
 	<div class="layoutright">
 		<h3><span id="infomation"></span></h3>
-		<input type="file" id="inputbox" name="view1" onchange="readURL(this)"
+		<input type="file" id="inputbox" name="view1" onchange="readInput(this)"
 			multiple="multiple" />
 		<p>	<input type='radio' name='scalemode' id='scalefit' value='fit'/ checked> autofit
 		<input type='radio' name='scalemode' id='scaleorigin' value='origin'/> 1:1</p>
@@ -91,7 +91,10 @@
 
 		pressed = false;
 		if (!dragged)
+		{
 			octx.clearRect(0,0,oC.width,oC.height);
+			selectRect.reset();
+		}
 		dragged = false;
 		selectedRect = false;
 	}
@@ -119,7 +122,6 @@
 		}
 		else
 		{
-			// select가 허용범위보다 크거나 작은것을 방
 			var px = evt.x;
 			var py = evt.y;
 			if (px > c.width){
@@ -153,12 +155,9 @@
 		}
 		
 		drawSelection(selectRect);
-		
-		
-
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
-		
 	}
+	
 	function drawSelection(sRect){
 		
 		octx.clearRect(0,0,c.width,c.height);
@@ -166,14 +165,11 @@
 		octx.fillRect(0, 0, oC.width, oC.height);
 		octx.globalCompositeOperation = 'destination-out';
 		octx.fillStyle = "black";
-		octx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);
-		
-		octx.lineWidth = 1;
-	
+		octx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
+		octx.lineWidth = 1;	
 		octx.globalCompositeOperation = "source-over"
 		octx.strokeStyle = "lime"
-		octx.rect(sRect.x,sRect.y,sRect.width,sRect.height);
-		
+		octx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
 		octx.stroke();
 		octx.beginPath();
 
@@ -233,7 +229,7 @@
 		button.href = dataURL;
 	}
 	
-	function handleFileSelect(evt) {
+	function handleImageDrop(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
 
@@ -249,7 +245,7 @@
 	var dropZone = document.getElementById('drop_zone')
 	// Setup the dnd listeners. 
 	dropZone.addEventListener('dragover', handleDragOver, false);
-	dropZone.addEventListener('drop', handleFileSelect, false);
+	dropZone.addEventListener('drop', handleImageDrop, false);
 	dropZone.addEventListener('mousemove', canvasMouseOver ,false)
 	dropZone.addEventListener('mousedown', canvasMouseDown ,false)
 	dropZone.addEventListener('mouseup', canvasMouseUp ,false)	

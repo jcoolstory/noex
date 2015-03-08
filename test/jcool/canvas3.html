@@ -13,7 +13,7 @@
 	float: left;
 	border: 1px solid #aaa;
 	text-align: center;
-	padding: 10px;
+	padding: 3px;
 	background: #f5f5f5;
 }
 
@@ -34,8 +34,8 @@
 .vcanvas {
 	background: #ddd;
 	border: 1px solid #aaa;
-	width: 150px;
-	height: 150px;
+	width: 160px;
+	height: 160px;
 }
 
 .layoutright {
@@ -45,7 +45,7 @@
 <body>
 	<div class="container" id="drop_zone"></div>
 	<div class="layoutright">
-		<input type="file" id="inputbox" name="view1" onchange="readURL(this)"
+		<input type="file" id="inputbox" name="view1" onchange="readInput(this)"
 			multiple="multiple" />
 	</div>
 </body>
@@ -53,27 +53,24 @@
 	var maxImage = 20;
 	var templateBuffer = '';
 	var templateImageViewer = '<div class="imageViewer"><canvas id="view{{index}}" class="vcanvas" ></canvas></div>'		
-	
-	var dropZone = document.getElementById('drop_zone')
+		
 	function refreshImage(name, src) {
-	var c = document.getElementById(name);
-	var ctx = c.getContext("2d");
-	var img = src;
-
-	ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
-}
-	for ( var i = 0; i < maxImage; i++) {
-		templateBuffer += templateImageViewer.replace('{{index}}', i + 1);
-	}
-	dropZone.innerHTML = templateBuffer;
+		var ctx = document.getElementById(name).getContext("2d");
+		var img = src;
 	
+		ctx.drawImage(img, 0, 0, ctx.canvas.width, ctx.canvas.height);
+	}
 	
 	function handleFileSelect(evt) {
 		evt.stopPropagation();
 		evt.preventDefault();
 
 		var files = evt.dataTransfer.files; // FileList object.
-		readSub(0, files[0]);
+		
+		readImage(0,files[0],function(name, src) {
+			var ctx = document.getElementById(name).getContext("2d");
+			ctx.drawImage(src, 0, 0, ctx.canvas.width, ctx.canvas.height);
+		});
 	}
 
 	function handleDragOver(evt) {
@@ -82,6 +79,11 @@
 		evt.dataTransfer.dropEffect = 'copy'; // Explicitly show this is a copy.
 	}
 	
+	var dropZone = document.getElementById('drop_zone')
+	for ( var i = 0; i < maxImage; i++) {
+		templateBuffer += templateImageViewer.replace('{{index}}', i + 1);
+	}
+	dropZone.innerHTML = templateBuffer;
 	// Setup the dnd listeners. 
 	dropZone.addEventListener('dragover', handleDragOver, false);
 	dropZone.addEventListener('drop', handleFileSelect, false);
