@@ -54,26 +54,19 @@ var canvasApp  = function(){
 	selectRect = new Rectangle();
 	
 	function vertex(context, x, y){
-		context.beginPath();
+		context.lineWidth = 0;
 		context.arc(x, y, 2, 0, 2 * Math.PI, true);
 		context.fillStyle = 'red';
 		context.fill();
-		//context.drawImage(gC, 0, 0);
+		context.beginPath();
 	}
 	function canvasMouseDown(evt){
 		pressed = true;
 		lpx = evt.x;
 		lpy = evt.y;
-		//console.log("circleX" + circleX);
-		//console.log("circleY" + circleY);
 		if(evt.x > selectRect.x && evt.x < selectRect.x + selectRect.w && evt.y > selectRect.y && evt.y < selectRect.y + selectRect.h){
 			selectedRect = true;
-		}else{
-			//vertex(gctx, lpx, lpy);
-			console.log(gC);
 		}
-		
-		//console.log("a" + lpx+", " + lpy);
 	}
 	
 	function canvasMouseMove(evt){
@@ -133,21 +126,17 @@ var canvasApp  = function(){
 		octx.stroke();
 		octx.beginPath();
 		
-		
+		vertex(octx, selectRect.x +  selectRect.w, selectRect.y +  selectRect.h);
 		vertex(octx, selectRect.x,selectRect.y);
 		vertex(octx, selectRect.x +  selectRect.w, selectRect.y);
 		vertex(octx, selectRect.x , selectRect.y +  selectRect.h);
-		vertex(octx, selectRect.x +  selectRect.w, selectRect.y +  selectRect.h);
+		
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 		
 	}
 	
 	function canvasMouseUp(evt){
-		if(!selectedRect){
-			//vertex(gctx, lpx + px, lpy + py);
-			//console.log("bbb");
-		}
-		
+
 		pressed = false;
 		if(!dragged)
 			octx.clearRect(0,0,oC.width,oC.height);
