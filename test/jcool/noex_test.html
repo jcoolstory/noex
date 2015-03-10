@@ -60,10 +60,10 @@
 		srcImg.height = ctx.canvas.height;
 		srcImg.image = img;
 		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
-		DrawImage(srcImg);
+		drawImage(srcImg);
 	}
 	
-	function DrawImage(image)
+	function drawImage(image)
 	{
 		if (getMode() == 'fit')
 			srcImg.draw();
@@ -139,13 +139,9 @@
 			px = px-lpx;
 			py = py-lpy;
 			
-			
-			selectRect.x = lpx;
-			selectRect.y = lpy;
-			selectRect.width = px;
-			selectRect.height = py;
-			
+			selectRect.set(lpx,lpy,px,py);
 		}
+		
 		if (srcImg != null)
 		{
 			cropRect.x = selectRect.x/c.width * srcImg.image.width;

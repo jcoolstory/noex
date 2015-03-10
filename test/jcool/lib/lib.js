@@ -41,6 +41,12 @@ var Rectangle = function(){
 	this.y = 0;
 	this.width = 1;
 	this.height = 1;
+	this.set = function(x,y,w,h){
+		this.x = x;
+		this.y = y;
+		this.width = w;
+		this.height = h;
+	};
 	this.reset = function()	{
 		this.x = 0;
 		this.y = 0;

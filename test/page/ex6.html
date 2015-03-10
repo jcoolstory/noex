@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+</head>
+<body>
+	<div class="container" id="drop_zone" style="float:left">
+		<canvas id="overlayCanvas" class="vcanvas" width="600" height="600" style="border:1px solid #ccc"></canvas>
+	</div>
+<div id="toolbar" style="clear:both">
+
+</div>
+<script type="text/javascript">
+var canvasApp  = function(){
+	var toolbarText = document.getElementById('toolbar');
+	var oC = document.getElementById('overlayCanvas');
+	var octx = oC.getContext("2d");
+	var gC = document.createElement("canvas");
+	var gctx = gC.getContext("2d");
+	gC.width = oC.width;
+	gC.height = oC.height;
+	
+	var pressed = false;
+	var dragged = false;
+	var dropZone = document.getElementById('drop_zone');
+	var lpx=0;
+	var lpy=0;	
+	var px = 0;
+	var py = 0;
+	var selectedRect = false;
+	var selectRect;
+	var resizing = false;
+	
+	function Rectangle(){
+		this.x = 0;
+		this.y = 0;
+		this.w = 1;
+		this.h = 1;
+		this.contains = function(ox,oy){
+			if(typeof oy == "undefined") {
+
+				return (ox.x > this.x && 
+						ox.x < this.x + this.width && 
+						ox.y > this.y && 
+						ox.y < this.y + this.height);
+			}
+			return (ox > this.x && 
+					ox < this.x + this.width && 
+					oy > this.y && 
+					oy < this.y + this.height);
+		};
+	}
+	selectRect = new Rectangle();
+	
+	function vertex(context, x, y){
+		context.beginPath();
+		context.arc(x, y, 2, 0, 2 * Math.PI, true);
+		context.fillStyle = 'red';
+		context.fill();
+		//context.drawImage(gC, 0, 0);
+	}
+	function canvasMouseDown(evt){
+		pressed = true;
+		lpx = evt.x;
+		lpy = evt.y;
+		//console.log("circleX" + circleX);
+		//console.log("circleY" + circleY);
+		if(evt.x > selectRect.x && evt.x < selectRect.x + selectRect.w && evt.y > selectRect.y && evt.y < selectRect.y + selectRect.h){
+			selectedRect = true;
+		}else{
+			//vertex(gctx, lpx, lpy);
+			console.log(gC);
+		}
+		
+		//console.log("a" + lpx+", " + lpy);
+	}
+	
+	function canvasMouseMove(evt){
+		
+		if(!pressed)
+			return;
+		dragged = true;
+		if(selectedRect){
+			selectRect.x -= (lpx-evt.x);
+			selectRect.y -= (lpy-evt.y);
+			
+			lpx = evt.x;
+			lpy = evt.y;
+			
+		}else{
+			px = evt.x;
+			py = evt.y;
+			
+			if(px > oC.width)
+				px = oC.width;
+			
+			if(py > oC.height)
+				py = oC.height;
+			
+			if(px < 0)
+				px = 0;
+			
+			if(py < 0)
+				py = 0;
+			
+			px = px - lpx;
+			py = py - lpy;
+			
+			selectRect.x = lpx;
+			selectRect.y = lpy;
+			selectRect.w = px;
+			selectRect.h = py;
+			
+		}
+		
+		octx.clearRect(0, 0, oC.width, oC.height);
+		
+		octx.fillStyle = "rgba(30, 30, 30, 0.8)";
+		octx.fillRect(0, 0, oC.width, oC.height);
+		octx.globalCompositeOperation = 'destination-out';
+		octx.fillStyle = "black";
+		octx.fillRect(selectRect.x,selectRect.y,selectRect.w,selectRect.h);
+		
+		octx.strokeStyle = 'rgba(255,0,0,1)';
+		octx.fillStyle = 'rgba(150,150,255,0.3)';
+		octx.lineWidth = 1;
+	
+		octx.globalCompositeOperation = "source-over";
+		octx.strokeStyle = "lime";
+		octx.rect(selectRect.x,selectRect.y,selectRect.w,selectRect.h);
+		
+		octx.stroke();
+		octx.beginPath();
+		
+		
+		vertex(octx, selectRect.x,selectRect.y);
+		vertex(octx, selectRect.x +  selectRect.w, selectRect.y);
+		vertex(octx, selectRect.x , selectRect.y +  selectRect.h);
+		vertex(octx, selectRect.x +  selectRect.w, selectRect.y +  selectRect.h);
+		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
+		
+	}
+	
+	function canvasMouseUp(evt){
+		if(!selectedRect){
+			//vertex(gctx, lpx + px, lpy + py);
+			//console.log("bbb");
+		}
+		
+		pressed = false;
+		if(!dragged)
+			octx.clearRect(0,0,oC.width,oC.height);
+		dragged = false;
+		selectedRect = false;
+	}
+
+	
+	dropZone.addEventListener('mousemove', canvasMouseMove ,false);
+	dropZone.addEventListener('mousedown', canvasMouseDown ,false);
+	dropZone.addEventListener('mouseup', canvasMouseUp ,false);
+}
+window.addEventListener('load', canvasApp, false);
+</script>
+
+</body>
+</html>
