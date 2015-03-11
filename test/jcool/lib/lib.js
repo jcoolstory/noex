@@ -81,3 +81,39 @@ var ImageRect = function(){
 	};
 };
 
+function drawVertex(context, x, y,focus){
+	
+	if (focus){
+		
+		context.lineWidth = 2;
+		context.lineStyle = 'gray';
+		context.fillStyle = 'black';
+	}
+	else{	
+		context.lineWidth = 0;
+		context.fillStyle = 'white';
+	}
+	
+	context.arc(x, y, 1.5, 0, 2 * Math.PI, true);
+	
+	context.fill();
+	context.beginPath();
+}
+
+
+function drawSelection(ctx,sRect,focus){
+	
+	ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+	ctx.fillStyle ='rgba(30,30,30,0.8)';
+	ctx.fillRect(0, 0, ctx.canvas.width,ctx.canvas.height);
+	ctx.globalCompositeOperation = 'destination-out';
+	ctx.fillStyle = "black";
+	ctx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
+	ctx.lineWidth = 1;	
+	ctx.globalCompositeOperation = "source-over";
+	ctx.strokeStyle = "lime";
+	ctx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
+	ctx.stroke();
+	ctx.beginPath();
+	
+}

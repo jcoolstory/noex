@@ -150,26 +150,11 @@
 			cropRect.height = selectRect.height/c.height * srcImg.image.height;
 		}
 		
-		drawSelection(selectRect);
+		drawSelection(octx,selectRect);
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	}
 	
-	function drawSelection(sRect){
-		
-		octx.clearRect(0,0,c.width,c.height);
-		octx.fillStyle ='rgba(30,30,30,0.8)'
-		octx.fillRect(0, 0, oC.width, oC.height);
-		octx.globalCompositeOperation = 'destination-out';
-		octx.fillStyle = "black";
-		octx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
-		octx.lineWidth = 1;	
-		octx.globalCompositeOperation = "source-over"
-		octx.strokeStyle = "lime"
-		octx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
-		octx.stroke();
-		octx.beginPath();
 
-	}
 	function imagecrop(){
 		if (srcImg == null)
 			return;

@@ -50,6 +50,13 @@
 	var selectedRect = false;
 	var selectRect = new Rectangle();
 	
+	var Point = function(){
+		
+		this.x = 0;
+		this.y = 0;
+		this.vertex = "none";
+	};
+	
 	function refreshImage(name, src) {
 	
 		var img = src;		
@@ -61,6 +68,11 @@
 		ir.image = img;
 		infomationText.innerHTML = 'width : ' + ir.image.width +' px <br/>height : ' + ir.image.height + ' px'; 
 		DrawImage(ir);
+	}
+	
+	function collisionTest(x1,y1,x2,y2,dist)
+	{
+		return Math.sqrt(Math.pow(x1-x2,2) + Math.pow(y1-y2,2)) <= dist; 
 	}
 	
 	function DrawImage(image)
@@ -92,10 +104,15 @@
 		pressed = false;
 		if (ir !=null)
 			ir.pressed = false;
-		if (!dragged)
+		if (!dragged && !selectVetexed)
+		{
 			octx.clearRect(0,0,oC.width,oC.height);
+			selectedRect.reset();
+		}
 		dragged = false;
+		
 		selectedRect = false;
+		selectVetexed = false;
 	}
 	function canvasMouseDown(evt){
 		pressed = true;	
@@ -103,13 +120,52 @@
 		lpy = evt.y;
 		if (evt.x > selectRect.x && evt.x < selectRect.x + selectRect.width && evt.y > selectRect.y && evt.y < selectRect.y + selectRect.height){
 			selectedRect = true;
-		}
-	}
-	
-	function canvasMouseOver(evt){
-		
-		if (!pressed)
 			return;
+		}
+
+		if (collisionTest(evt.x,evt.y,
+				selectRect.x,selectRect.y,5))
+		{
+			selectVetex.x = selectRect.x;
+			selectVetex.y = selectRect.y;
+			selectVetexed = true;
+			selectVetex.vertex = 'lefttop';
+ 		}
+		
+		if (collisionTest(evt.x,evt.y,
+				selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,5))
+		{
+			selectVetex.x = selectRect.x +  selectRect.width;
+			selectVetex.y = selectRect.y +  selectRect.height;
+			selectVetexed = true;
+			selectVetex.vertex = 'rightbottom';
+		}
+
+		if (collisionTest(evt.x,evt.y, selectRect.x +  selectRect.width, selectRect.y,5))
+		{
+			selectVetex.x = selectRect.x +  selectRect.width;
+			selectVetex.y = selectRect.y;
+			selectVetexed = true;		
+			selectVetex.vertex = 'righttop';
+		}
+
+		if (collisionTest(evt.x,evt.y,
+				selectRect.x , selectRect.y +  selectRect.height,5))
+		{
+			selectVetex.x = selectRect.x;
+			selectVetex.y = selectRect.y +  selectRect.height;
+			selectVetexed = true;
+
+			selectVetex.vertex = 'leftbottom';
+		}
+
+	}
+	var selectVetexed = false; 
+	var selectVetex = new Point();
+	
+	
+	function pressMove(evt)
+	{
 		dragged = true;
 		if (selectedRect)
 		{
@@ -118,6 +174,42 @@
 				
 			lpx = evt.x;
 			lpy = evt.y;
+		}
+		else if (selectVetexed)
+		{
+			switch (selectVetex.vertex)
+			{
+			case 'lefttop':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				selectRect.x = evt.x;
+				selectRect.y = evt.y;
+				selectRect.width -= xoff; 
+				selectRect.height -= yoff;
+				break
+			case 'righttop':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				selectRect.y = evt.y;
+				selectRect.width = xoff; 
+				selectRect.height -= yoff;
+				break
+			case 'rightbottom':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				
+				selectRect.width = xoff; 
+				selectRect.height = yoff;
+				break
+			case 'leftbottom':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				selectRect.x = evt.x;
+			//	selectRect.y = evt.y;
+				selectRect.width -= xoff ; 
+				selectRect.height = yoff;
+				break
+			}
 		}
 		else
 		{
@@ -153,30 +245,42 @@
 			cropRect.width = selectRect.width/c.width * ir.image.width;
 			cropRect.height = selectRect.height/c.height * ir.image.height;
 		}
-		
-		octx.clearRect(0,0,c.width,c.height);
-		octx.fillStyle ='rgba(30,30,30,0.8)'
-		octx.fillRect(0, 0, oC.width, oC.height);
-		octx.globalCompositeOperation = 'destination-out';
-		octx.fillStyle = "black";
-		octx.fillRect(selectRect.x,selectRect.y,selectRect.width,selectRect.height);
-		
-	
-		
-		octx.strokeStyle = 'rgba(255,0,0,1)';
-		octx.fillStyle = 'rgba(150,150,255,0.3)'
-		octx.lineWidth = 1;
-	
-		octx.globalCompositeOperation = "source-over"
-		octx.strokeStyle = "lime"
-		octx.rect(selectRect.x,selectRect.y,selectRect.width,selectRect.height);
-		
-		octx.stroke();
-		octx.beginPath();
 
-
+		drawSelection(octx,selectRect);
+		
+		drawVertex(octx, selectRect.x,selectRect.y);
+		drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y +  selectRect.height);		
+		drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y);
+		drawVertex(octx, selectRect.x , selectRect.y +  selectRect.height);
+			
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
+	
+	}
+	function canvasMouseOver(evt){
 		
+		if (pressed)
+		{
+			pressMove(evt);
+		}
+		else {
+			if (selectRect.width + selectRect.height <4)
+				return;
+			
+			drawVertex(octx, selectRect.x,selectRect.y,collisionTest(evt.x,evt.y,
+					selectRect.x,selectRect.y,3));
+			
+			drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,collisionTest(evt.x,evt.y,
+					selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,3));		
+
+			drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y,collisionTest(evt.x,evt.y,
+					selectRect.x +  selectRect.width, selectRect.y,3));
+
+			drawVertex(octx, selectRect.x , selectRect.y +  selectRect.height,collisionTest(evt.x,evt.y,
+					selectRect.x , selectRect.y +  selectRect.height,3));
+
+			
+		}
+			
 	}
 	
 	function imagecrop(){
