@@ -72,7 +72,6 @@ var canvasApp  = function(){
 	}
 	
 	function canvasMouseMove(evt){
-		
 		if(!pressed)
 			return;
 		dragged = true;
@@ -128,11 +127,18 @@ var canvasApp  = function(){
 		octx.stroke();
 		octx.beginPath();
 		
+		//ÁÂÇ¥À§Ä¡
 		vertex(selectRect.x + selectRect.w, selectRect.y + selectRect.h);
 		vertex(selectRect.x,selectRect.y);
 		vertex(selectRect.x + selectRect.w, selectRect.y);
 		vertex(selectRect.x, selectRect.y + selectRect.h);
 		
+		vertex(selectRect.x + (selectRect.w/2), selectRect.y);
+		vertex(selectRect.x + selectRect.w, selectRect.y + (selectRect.h/2));
+		vertex(selectRect.x, selectRect.y + (selectRect.h/2));
+		vertex(selectRect.x + (selectRect.w/2), selectRect.y + selectRect.h);
+		
+		vertex(selectRect.x + (selectRect.w/2), selectRect.y + (selectRect.h/2));//Áß¾ÓÁ¡
 		
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 		
