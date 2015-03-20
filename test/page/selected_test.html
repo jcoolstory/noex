@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Insert title here</title>
+</head>
+<body>
+<canvas id="canvas" width="500" height="500"></canvas>
+<script type="text/javascript">
+var canvasApp = function(){
+	var oC = document.getElementById("canvas"),
+		  oCtx = oC.getContext("2d");
+	
+	var pressed = false,
+		dragged = false,
+		selectedRect = false,
+		resizing = false;
+	
+	var layerX = 0,
+		 layerY = 0,
+		 pX = 0,
+		 pY = 0;
+	
+	var selRect;
+	
+	function Rectangle(){
+		this.x = 0;
+		this.y = 0;
+		this.w = 1;
+		this.h = 1;
+	}
+	
+	selRect = new Rectangle();
+	
+	function vertex(x, y){
+		oCtx.arc(x, y, 2, 0, 2 * Math.PI, true);
+		oCtx.fillStyle = "blue";
+		oCtx.fill();
+		oCtx.beginPath();
+	}
+	
+	function mouseDown(e){
+		pressed =true;
+		layerX =e.layerX;
+		layerY = e.layerY;
+		
+		if(e.layerX > selRect.x && e.layerX < selRect.x + selRect.w && e.layerY > selRect.y && e.layerY < selRect.y + selRect.h)
+			selectedRect = true;
+		else if(e.layerX < selRect.x && e.layerX > selRect.x + selRect.w && e.layerY < selRect.y && e.layerY > selRect.y + selRect.h)
+			selectedRect = true;
+		
+		//검정 바탕 클릭시 selectRect 초기화
+		if(!selectedRect){
+			selRect.x = 0;
+			selRect.y = 0;
+			selRect.w = 0;
+			selRect.h = 0;
+		}
+	}
+	
+	function mouseMove(e){
+		if(!pressed)
+			return;
+		
+		dragged = true;
+		if(selectedRect){
+			selRect.x -= (layerX - e.layerX);
+			selRect.y -= (layerY - e.layerY);
+			
+			layerX = e.layerX;
+			layerY = e.layerY;
+		}else{
+			px = e.layerX;
+			py = e.layerY;
+			
+			if(px > oC.width)
+				px = oC.width;
+			if(py > oC.height)
+				py = oC.height;
+			if(px < 0)
+				px = 0;
+			if(py < 0)
+				py = 0;
+			
+			px -= layerX;
+			py -= layerY;
+			
+			selRect.x = layerX;
+			selRect.y = layerY;
+			selRect.w = px;
+			selRect.h = py;
+			
+		}
+		oCtx.clearRect(0,0, oC.width, oC.height);
+		oCtx.fillStyle = "rgba(30, 30, 30, 0.8)";
+		oCtx.fillRect(0, 0, oC.width, oC.height);
+		oCtx.globalCompositeOperation = "destination-out";
+		oCtx.fillStyle = "black";
+		oCtx.fillRect(selRect.x, selRect.y, selRect.w, selRect.h);
+		
+		oCtx.strokeStyle = "rgba(255, 0, 0, 1)";
+		oCtx.fillStyle = "rgba(150, 150, 255, 0.3)";
+		oCtx.lineWidth = 0.5;
+		
+		oCtx.globalCompositeOperation = "source-over";
+		oCtx.strokeStyle = "lime";
+		oCtx.rect(selRect.x, selRect.y, selRect.w, selRect.h);
+		oCtx.stroke();
+		oCtx.beginPath();
+		
+		//좌표위치 시계방향으로
+		vertex(selRect.x + selRect.w, selRect.y);
+		vertex(selRect.x + selRect.w, selRect.y + (selRect.h/2));
+		vertex(selRect.x + selRect.w, selRect.y + selRect.h);
+		vertex(selRect.x + (selRect.w/2), selRect.y + selRect.h);
+		vertex(selRect.x, selRect.y + selRect.h);
+		vertex(selRect.x, selRect.y + (selRect.h/2));
+		vertex(selRect.x, selRect.y);
+		vertex(selRect.x + (selRect.w/2), selRect.y);
+		
+		//중앙점
+		vertex(selRect.x + (selRect.w/2), selRect.y + (selRect.h/2));
+	}
+	
+	function mouseUp(e){
+		pressed = false;
+		if(!dragged)
+			oCtx.clearRect(0, 0, oC.width, oC.height);
+		dragged = false;
+		selectedRect = false;
+	}
+	
+	oC.addEventListener('mousedown', mouseDown, false);
+	oC.addEventListener('mousemove', mouseMove, false);
+	oC.addEventListener('mouseup', mouseUp, false);
+}
+
+window.addEventListener('load', canvasApp, false);
+</script>
+</body>
+</html>
