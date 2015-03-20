@@ -22,6 +22,7 @@ var canvasApp = function(){
 		 pY = 0;
 	
 	var selRect;
+	var selectedVetex = false;
 	
 	function Rectangle(){
 		this.x = 0;
@@ -30,13 +31,100 @@ var canvasApp = function(){
 		this.h = 1;
 	}
 	
+	function point(){
+		this.x = 0;
+		this.y = 0;
+		this.txt = "none";
+	}
+	
 	selRect = new Rectangle();
 	
+	selectVetexed = false;
+	selectVetex = new point();
+	
+	//각 사이즈 조절할 위치 배치
 	function vertex(x, y){
 		oCtx.arc(x, y, 2, 0, 2 * Math.PI, true);
 		oCtx.fillStyle = "blue";
 		oCtx.fill();
 		oCtx.beginPath();
+	}
+	
+	
+	//vertex위치에서 사이즈 조절
+	function expandRect(x, y, selX, selY, position){
+		var powX = Math.pow(x - selX, 2);
+		var powY = Math.pow(y - selY, 2);
+		return Math.sqrt(powX + powY) <= position;
+	}
+	
+	//	각위치
+	function selVetex(e){
+		//시계방향으로 돌리기 rightTop부터
+		if(expandRect(e.layerX, e.layerY, selRect.x + selRect.w, selRect.y, 5)){
+			selectVetex.x = selRect.x + selRect.w;
+			selectVetex.y = selRect.y;
+			selectVetex.txt = "rightTop";
+			selectedVetex = true;
+		}
+
+		if(expandRect(e.layerX, e.layerY, selRect.x + selRect.w, selRect.y + selRect.h, 5)){
+			selectVetex.x = selRect.x + selRect.w;
+			selectVetex.y = selRect.y + selRect.h;
+			selectedRect.txt = "rightBottom";
+			selectedVetex = true;
+		}
+		
+		if(expandRect(e.layerX, e.layerY, selRect.x, selRect.y+ selRect.h, 5)){
+			selectVetex.x = selRect.x;
+			selectVetex.y = selRect.y + selRect.h;
+			selectVetex.txt = "leftBottom";
+			selectedVetex = true;
+		}
+		
+		if(expandRect(e.layerX, e.layerY, selRect.x, selRect.y, 5)){
+			selectVetex.x = selRect.x;
+			selectVetex.y = selRect.y;
+			selectVetex.txt = "leftTop";
+			selectedVetex = true;
+		}
+		console.log("bbbbbbbbbbb");
+	}
+	
+	//생성함수에 값 전달 함수
+	function selExpandMove(e){
+		var xOff = 0;
+		var yOff = 0;
+		switch(selectVetex.txt){
+			case "rightTop":
+				xOff = e.x - selRect.x;
+				yOff = e.y - selRect.y;
+				selRect.y = e.y;
+				selRect.w = xOff;
+				selRect.h -= yOff;
+				break;
+			case "rightBottom":
+				xOff = e.x - selRect.x;
+				yOff = e.y - selRect.y;
+				selRect.w = xOff;
+				selRect.h = yOff;
+				break;
+			case "leftBottom":
+				xOff = e.x - selRect.x;
+				yOff = e.y - selRect.y;
+				selRect.x = e.x;
+				selRect.w -= xOff;
+				selRect.h = yOff;
+				break;
+			case "leftTop":
+				xOff = e.x - selRect.x;
+				yOff = e.y - selRect.y;
+				selRect.x = e.x;
+				selRect.y = e.y;
+				selRect.w -= xOff;
+				selRect.h -= yOff;
+				break;
+		}
 	}
 	
 	function mouseDown(e){
@@ -49,13 +137,17 @@ var canvasApp = function(){
 		else if(e.layerX < selRect.x && e.layerX > selRect.x + selRect.w && e.layerY < selRect.y && e.layerY > selRect.y + selRect.h)
 			selectedRect = true;
 		
+		//각 꼭지점 사이즈조절 함수로뺌
+		selVetex(e);
+		
 		//검정 바탕 클릭시 selectRect 초기화
-		if(!selectedRect){
+		/* if(!selectedRect){
 			selRect.x = 0;
 			selRect.y = 0;
 			selRect.w = 0;
 			selRect.h = 0;
-		}
+		} */
+		
 	}
 	
 	function mouseMove(e){
@@ -69,6 +161,8 @@ var canvasApp = function(){
 			
 			layerX = e.layerX;
 			layerY = e.layerY;
+		}else if(selectedVetex){
+			selExpandMove(e);
 		}else{
 			px = e.layerX;
 			py = e.layerY;
@@ -91,7 +185,19 @@ var canvasApp = function(){
 			selRect.h = py;
 			
 		}
-		oCtx.clearRect(0,0, oC.width, oC.height);
+		oCtx.clearRect(0,0, oC.width, oC.height)
+		
+		//3등분 라인 만들기
+		
+		oCtx.moveTo(selRect.x + (selRect.w /3), selRect.y);
+		oCtx.lineTo(selRect.x + (selRect.w /3), selRect.y+selRect.h);
+		oCtx.moveTo(selRect.x + (selRect.w /1.5), selRect.y);
+		oCtx.lineTo(selRect.x + (selRect.w /1.5), selRect.y+selRect.h);
+		oCtx.moveTo(selRect.x, selRect.y+(selRect.h /3));
+		oCtx.lineTo(selRect.x + selRect.w, selRect.y+(selRect.h /3));
+		oCtx.moveTo(selRect.x, selRect.y+(selRect.h /1.5));
+		oCtx.lineTo(selRect.x + selRect.w, selRect.y+(selRect.h /1.5));
+		
 		oCtx.fillStyle = "rgba(30, 30, 30, 0.8)";
 		oCtx.fillRect(0, 0, oC.width, oC.height);
 		oCtx.globalCompositeOperation = "destination-out";
@@ -105,7 +211,11 @@ var canvasApp = function(){
 		oCtx.globalCompositeOperation = "source-over";
 		oCtx.strokeStyle = "lime";
 		oCtx.rect(selRect.x, selRect.y, selRect.w, selRect.h);
+		
+		
 		oCtx.stroke();
+		
+		
 		oCtx.beginPath();
 		
 		//좌표위치 시계방향으로
@@ -118,16 +228,15 @@ var canvasApp = function(){
 		vertex(selRect.x, selRect.y);
 		vertex(selRect.x + (selRect.w/2), selRect.y);
 		
-		//중앙점
-		vertex(selRect.x + (selRect.w/2), selRect.y + (selRect.h/2));
 	}
 	
 	function mouseUp(e){
 		pressed = false;
-		if(!dragged)
+		if(!dragged && !selectVetexed)
 			oCtx.clearRect(0, 0, oC.width, oC.height);
 		dragged = false;
 		selectedRect = false;
+		selectVetexed = false;
 	}
 	
 	oC.addEventListener('mousedown', mouseDown, false);
