@@ -5,16 +5,18 @@
 <title>Insert title here</title>
 </head>
 <body>
-<canvas id="canvas" width="500" height="500"></canvas>
+<canvas id="canvas" width="500" height="500" style="border:1px solid black"></canvas>
 <script type="text/javascript">
 var canvasApp = function(){
+	
 	var oC = document.getElementById("canvas"),
 		  oCtx = oC.getContext("2d");
 	
 	var pressed = false,
 		dragged = false,
 		selectedRect = false,
-		resizing = false;
+		resizing = false,
+		cursored = false;
 	
 	var layerX = 0,
 		 layerY = 0,
@@ -22,14 +24,38 @@ var canvasApp = function(){
 		 pY = 0;
 	
 	var selRect;
-	var selectedVetex = false;
-	
-	function Rectangle(){
+
+	var Rectangle = function(){
 		this.x = 0;
 		this.y = 0;
-		this.w = 1;
-		this.h = 1;
-	}
+		this.width = 1;
+		this.height = 1;
+		this.set = function(x,y,w,h){
+			this.x = x;
+			this.y = y;
+			this.width = w;
+			this.height = h;
+		};
+		this.reset = function()	{
+			this.x = 0;
+			this.y = 0;
+			this.width = 0;
+			this.height = 0;	
+		};
+		this.contains = function(ox,oy){
+			if(typeof oy == "undefined") {
+
+				return (ox.x > this.x && 
+						ox.x < this.x + this.width && 
+						ox.y > this.y && 
+						ox.y < this.y + this.height);
+			}
+			return (ox > this.x && 
+					ox < this.x + this.width && 
+					oy > this.y && 
+					oy < this.y + this.height);
+		};
+	};
 	
 	function point(){
 		this.x = 0;
@@ -39,7 +65,7 @@ var canvasApp = function(){
 	
 	selRect = new Rectangle();
 	
-	selectVetexed = false;
+	var selectedVetex = false;
 	selectVetex = new point();
 	
 	//각 사이즈 조절할 위치 배치
@@ -66,13 +92,15 @@ var canvasApp = function(){
 			selectVetex.y = selRect.y;
 			selectVetex.txt = "rightTop";
 			selectedVetex = true;
+			e.target.style.cursor = "nw-resize";
 		}
 
 		if(expandRect(e.layerX, e.layerY, selRect.x + selRect.w, selRect.y + selRect.h, 5)){
 			selectVetex.x = selRect.x + selRect.w;
 			selectVetex.y = selRect.y + selRect.h;
-			selectedRect.txt = "rightBottom";
+			selectVetex.txt = "rightBottom";
 			selectedVetex = true;
+			e.target.style.cursor = "nw-resize";
 		}
 		
 		if(expandRect(e.layerX, e.layerY, selRect.x, selRect.y+ selRect.h, 5)){
@@ -80,6 +108,7 @@ var canvasApp = function(){
 			selectVetex.y = selRect.y + selRect.h;
 			selectVetex.txt = "leftBottom";
 			selectedVetex = true;
+			e.target.style.cursor = "nw-resize";
 		}
 		
 		if(expandRect(e.layerX, e.layerY, selRect.x, selRect.y, 5)){
@@ -88,7 +117,7 @@ var canvasApp = function(){
 			selectVetex.txt = "leftTop";
 			selectedVetex = true;
 		}
-		console.log("bbbbbbbbbbb");
+		
 	}
 	
 	//생성함수에 값 전달 함수
@@ -97,26 +126,33 @@ var canvasApp = function(){
 		var yOff = 0;
 		switch(selectVetex.txt){
 			case "rightTop":
+				console.log("rightTop");
 				xOff = e.x - selRect.x;
 				yOff = e.y - selRect.y;
 				selRect.y = e.y;
 				selRect.w = xOff;
 				selRect.h -= yOff;
 				break;
+				
 			case "rightBottom":
+				console.log("rightBottom");
 				xOff = e.x - selRect.x;
 				yOff = e.y - selRect.y;
 				selRect.w = xOff;
 				selRect.h = yOff;
 				break;
+				
 			case "leftBottom":
+				console.log("leftBottom");
 				xOff = e.x - selRect.x;
 				yOff = e.y - selRect.y;
 				selRect.x = e.x;
 				selRect.w -= xOff;
 				selRect.h = yOff;
 				break;
+				
 			case "leftTop":
+				console.log("leftTop");
 				xOff = e.x - selRect.x;
 				yOff = e.y - selRect.y;
 				selRect.x = e.x;
@@ -132,37 +168,69 @@ var canvasApp = function(){
 		layerX =e.layerX;
 		layerY = e.layerY;
 		
-		if(e.layerX > selRect.x && e.layerX < selRect.x + selRect.w && e.layerY > selRect.y && e.layerY < selRect.y + selRect.h)
+		if(e.layerX > selRect.x && e.layerX < selRect.x + selRect.w && e.layerY > selRect.y && e.layerY < selRect.y + selRect.h){
 			selectedRect = true;
-		else if(e.layerX < selRect.x && e.layerX > selRect.x + selRect.w && e.layerY < selRect.y && e.layerY > selRect.y + selRect.h)
+			console.log("aaaaaaaaaaaaa");
+		}else if(e.layerX < selRect.x && e.layerX > selRect.x + selRect.w && e.layerY < selRect.y && e.layerY > selRect.y + selRect.h){
 			selectedRect = true;
-		
-		//각 꼭지점 사이즈조절 함수로뺌
-		selVetex(e);
-		
-		//검정 바탕 클릭시 selectRect 초기화
-		/* if(!selectedRect){
+			console.log("bbbbbbbbbbbbbb");
+		}else{
+			/* selectedRect = false;
 			selRect.x = 0;
 			selRect.y = 0;
 			selRect.w = 0;
 			selRect.h = 0;
-		} */
+			console.log("ccccccccccccccc"); */
+		}
+		//각 꼭지점 사이즈조절 함수로뺌
+		selVetex(e);		
+	}
+	
+	//커서좌표
+	function cursorMove(e){
+		e.target.style.cursor = "Crosshair";
+		cursored = false;
+		if(e.layerX > selRect.x && e.layerX < selRect.x + selRect.w && e.layerY > selRect.y && e.layerY < selRect.y + selRect.h){
+			e.target.style.cursor = "Default";
+		}else if(e.layerX < selRect.x && e.layerX > selRect.x + selRect.w && e.layerY < selRect.y && e.layerY > selRect.y + selRect.h){
+			e.target.style.cursor = "Default";
+		}
 		
+		if(expandRect(e.layerX, e.layerY, selRect.x + selRect.w, selRect.y, 5)){
+			e.target.style.cursor = "ne-resize";
+		}
+		if(expandRect(e.layerX, e.layerY, selRect.x + selRect.w, selRect.y + selRect.h, 5)){
+			e.target.style.cursor = "nw-resize";
+
+		}
+		if(expandRect(e.layerX, e.layerY, selRect.x, selRect.y+ selRect.h, 5)){
+			e.target.style.cursor = "ne-resize";
+		}
+		if(expandRect(e.layerX, e.layerY, selRect.x, selRect.y, 5)){
+			e.target.style.cursor = "nw-resize";
+		}
+
+		/* e.target.style.cursor = "ne-resize";//오른쪽상단, 왼쪽하단 대각선
+		e.target.style.cursor = "nw-resize";// 왼쪽상단, 우측하단 대각선
+		e.target.style.cursor = "e-resize";//좌우
+		e.target.style.cursor = "s-resize";
+		
+		e.target.style.cursor = "Crosshair"; */
 	}
 	
 	function mouseMove(e){
 		if(!pressed)
 			return;
-		
 		dragged = true;
 		if(selectedRect){
 			selRect.x -= (layerX - e.layerX);
 			selRect.y -= (layerY - e.layerY);
-			
 			layerX = e.layerX;
 			layerY = e.layerY;
+			
 		}else if(selectedVetex){
 			selExpandMove(e);
+			
 		}else{
 			px = e.layerX;
 			py = e.layerY;
@@ -188,7 +256,6 @@ var canvasApp = function(){
 		oCtx.clearRect(0,0, oC.width, oC.height)
 		
 		//3등분 라인 만들기
-		
 		oCtx.moveTo(selRect.x + (selRect.w /3), selRect.y);
 		oCtx.lineTo(selRect.x + (selRect.w /3), selRect.y+selRect.h);
 		oCtx.moveTo(selRect.x + (selRect.w /1.5), selRect.y);
@@ -214,8 +281,6 @@ var canvasApp = function(){
 		
 		
 		oCtx.stroke();
-		
-		
 		oCtx.beginPath();
 		
 		//좌표위치 시계방향으로
@@ -232,15 +297,17 @@ var canvasApp = function(){
 	
 	function mouseUp(e){
 		pressed = false;
-		if(!dragged && !selectVetexed)
+		if(!dragged && !selectedVetex){
 			oCtx.clearRect(0, 0, oC.width, oC.height);
+		}
 		dragged = false;
 		selectedRect = false;
-		selectVetexed = false;
+		selectedVetex = false;
 	}
 	
 	oC.addEventListener('mousedown', mouseDown, false);
 	oC.addEventListener('mousemove', mouseMove, false);
+	oC.addEventListener('mousemove', cursorMove, false);
 	oC.addEventListener('mouseup', mouseUp, false);
 }
 
