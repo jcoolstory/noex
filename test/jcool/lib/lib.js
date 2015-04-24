@@ -121,7 +121,7 @@ function drawSelection(ctx,sRect,focus){
 	ctx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
 	ctx.lineWidth = 1;	
 	ctx.globalCompositeOperation = "source-over";
-	ctx.strokeStyle = "lime";
+	ctx.strokeStyle = "lightgray";
 	ctx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
 	ctx.stroke();
 	ctx.beginPath();
