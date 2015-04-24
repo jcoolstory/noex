@@ -104,6 +104,16 @@ function drawVertex(context, x, y,focus){
 function drawSelection(ctx,sRect,focus){
 	
 	ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+	ctx.strokeStyle = "back";
+	ctx.moveTo(sRect.x + (sRect.width /3), sRect.y);
+	ctx.lineTo(sRect.x + (sRect.width /3), sRect.y+sRect.height);
+	ctx.moveTo(sRect.x + (sRect.width /1.5), sRect.y);
+	ctx.lineTo(sRect.x + (sRect.width /1.5), sRect.y+sRect.height);
+	ctx.moveTo(sRect.x, sRect.y+(sRect.height /3));
+	ctx.lineTo(sRect.x + sRect.width, sRect.y+(sRect.height /3));
+	ctx.moveTo(sRect.x, sRect.y+(sRect.height /1.5));
+	ctx.lineTo(sRect.x + sRect.width, sRect.y+(sRect.height /1.5));
+	
 	ctx.fillStyle ='rgba(30,30,30,0.8)';
 	ctx.fillRect(0, 0, ctx.canvas.width,ctx.canvas.height);
 	ctx.globalCompositeOperation = 'destination-out';
@@ -115,5 +125,5 @@ function drawSelection(ctx,sRect,focus){
 	ctx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
 	ctx.stroke();
 	ctx.beginPath();
-	
+
 }

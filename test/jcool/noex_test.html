@@ -46,7 +46,15 @@
 	var lpy=0;
 	var cropRect = new Rectangle();
 	var dragged = false;
-
+	var selectVetexed = false; 
+	var Point = function(){
+		
+		this.x = 0;
+		this.y = 0;
+		this.vertex = "none";
+	};
+	
+	var selectVetex = new Point();
 	var selectedRect = false;
 	var selectRect = new Rectangle();
 	
@@ -62,6 +70,11 @@
 		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
 		drawImage(srcImg);
 	}
+	function collisionTest(x1,y1,x2,y2,dist)
+	{
+		return Math.sqrt(Math.pow(x1-x2,2) + Math.pow(y1-y2,2)) <= dist; 
+	}
+
 	
 	function drawImage(image)
 	{
@@ -90,14 +103,50 @@
 	function canvasMouseUp(evt){
 
 		pressed = false;
-		if (!dragged)
+		if (!dragged && !selectVetexed)
 		{
 			octx.clearRect(0,0,oC.width,oC.height);
 			selectRect.reset();
 		}
 		dragged = false;
+		
 		selectedRect = false;
+		selectVetexed = false;
 	}
+	
+	//커서좌표
+	function cursorMove(e){
+		e.target.style.cursor = "Default";
+		cursored = false;
+		if(e.layerX > selectRect.x && e.layerX < selectRect.x + selectRect.w && e.layerY > selectRect.y && e.layerY < selectRect.y + selectRect.height){
+			e.target.style.cursor = "Default";
+		}else if(e.layerX < selectRect.x && e.layerX > selectRect.x + selectRect.width && e.layerY < selectRect.y && e.layerY > selectRect.y + selectRect.height){
+			e.target.style.cursor = "Default";
+		}
+		
+		if(collisionTest(e.layerX, e.layerY, selectRect.x + selectRect.width, selectRect.y, 5)){
+			e.target.style.cursor = "ne-resize";
+		}
+		if(collisionTest(e.layerX, e.layerY, selectRect.x + selectRect.width, selectRect.y + selectRect.height, 5)){
+			e.target.style.cursor = "nw-resize";
+
+		}
+		if(collisionTest(e.layerX, e.layerY, selectRect.x, selectRect.y+ selectRect.height, 5)){
+			e.target.style.cursor = "ne-resize";
+		}
+		if(collisionTest(e.layerX, e.layerY, selectRect.x, selectRect.y, 5)){
+			e.target.style.cursor = "nw-resize";
+		}
+
+		/* e.target.style.cursor = "ne-resize";//오른쪽상단, 왼쪽하단 대각선
+		e.target.style.cursor = "nw-resize";// 왼쪽상단, 우측하단 대각선
+		e.target.style.cursor = "e-resize";//좌우
+		e.target.style.cursor = "s-resize";
+		
+		e.target.style.cursor = "Crosshair"; */
+	}
+	
+	
 	function canvasMouseDown(evt){
 		pressed = true;	
 		lpx = evt.x;
@@ -105,53 +154,67 @@
 		if (selectRect.contains(evt)){
 			selectedRect = true;
 		}
+		
+		if (collisionTest(evt.x,evt.y,
+				selectRect.x,selectRect.y,5))
+		{
+			selectVetex.x = selectRect.x;
+			selectVetex.y = selectRect.y;
+			selectVetexed = true;
+			selectVetex.vertex = 'lefttop';
+ 		}
+		
+		if (collisionTest(evt.x,evt.y,
+				selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,5))
+		{
+			selectVetex.x = selectRect.x +  selectRect.width;
+			selectVetex.y = selectRect.y +  selectRect.height;
+			selectVetexed = true;
+			selectVetex.vertex = 'rightbottom';
+		}
+
+		if (collisionTest(evt.x,evt.y, selectRect.x +  selectRect.width, selectRect.y,5))
+		{
+			selectVetex.x = selectRect.x +  selectRect.width;
+			selectVetex.y = selectRect.y;
+			selectVetexed = true;		
+			selectVetex.vertex = 'righttop';
+		}
+
+		if (collisionTest(evt.x,evt.y,
+				selectRect.x , selectRect.y +  selectRect.height,5))
+		{
+			selectVetex.x = selectRect.x;
+			selectVetex.y = selectRect.y +  selectRect.height;
+			selectVetexed = true;
+
+			selectVetex.vertex = 'leftbottom';
+		}
 	}
 	
-	function canvasMouseOver(evt){
+function canvasMouseOver(evt){
 		
-		if (!pressed)
-			return;
-		dragged = true;
-		if (selectedRect)
+		if (pressed)
 		{
-			selectRect.x -= (lpx-evt.x);
-			selectRect.y -= (lpy-evt.y);
-				
-			lpx = evt.x;
-			lpy = evt.y;
+			pressMove(evt);
 		}
-		else
-		{
-			var px = evt.x;
-			var py = evt.y;
-			if (px > c.width){
-				px = c.width;
-			}		
-			if (py > c.height){					
-				py = c.height;
-			}		
-			if (px < 0){
-				px = 0;
-			}		
-			if (py < 0){
-				py = 0;
-			}		
-			px = px-lpx;
-			py = py-lpy;
+		else {
+			if (selectRect.width + selectRect.height <4)
+				return;
 			
-			selectRect.set(lpx,lpy,px,py);
+			drawVertex(octx, selectRect.x,selectRect.y,collisionTest(evt.x,evt.y,
+					selectRect.x,selectRect.y,5));
+			
+			drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,collisionTest(evt.x,evt.y,
+					selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,5));		
+
+			drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y,collisionTest(evt.x,evt.y,
+					selectRect.x +  selectRect.width, selectRect.y,5));
+
+			drawVertex(octx, selectRect.x , selectRect.y +  selectRect.height,collisionTest(evt.x,evt.y,
+					selectRect.x , selectRect.y +  selectRect.height,5));
+			cursorMove(evt)
 		}
-		
-		if (srcImg != null)
-		{
-			cropRect.x = selectRect.x/c.width * srcImg.image.width;
-			cropRect.y = selectRect.y/c.height * srcImg.image.height;
-			cropRect.width = selectRect.width/c.width * srcImg.image.width;
-			cropRect.height = selectRect.height/c.height * srcImg.image.height;
-		}
-		
-		drawSelection(octx,selectRect);
-		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	}
 	
 
@@ -173,7 +236,98 @@
 			octx.clearRect(0,0,oC.width,oC.height);
 		}
 	}
+	function pressMove(evt)
+	{
+		dragged = true;
+		if (selectedRect)
+		{
+			selectRect.x -= (lpx-evt.x);
+			selectRect.y -= (lpy-evt.y);
+				
+			lpx = evt.x;
+			lpy = evt.y;
+		}
+		else if (selectVetexed)
+		{
+			switch (selectVetex.vertex)
+			{
+			case 'lefttop':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				selectRect.x = evt.x;
+				selectRect.y = evt.y;
+				selectRect.width -= xoff; 
+				selectRect.height -= yoff;
+				break
+			case 'righttop':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				selectRect.y = evt.y;
+				selectRect.width = xoff; 
+				selectRect.height -= yoff;
+				break
+			case 'rightbottom':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				
+				selectRect.width = xoff; 
+				selectRect.height = yoff;
+				break
+			case 'leftbottom':
+				var xoff = evt.x - selectRect.x; 
+				var yoff = evt.y - selectRect.y
+				selectRect.x = evt.x;
+			//	selectRect.y = evt.y;
+				selectRect.width -= xoff ; 
+				selectRect.height = yoff;
+				break
+			}
+		}
+		else
+		{
+			// select가 허용범위보다 크거나 작은것을 방
+			var px = evt.x;
+			var py = evt.y;
+			if (px > c.width){
+				px = c.width;
+			}		
+			if (py > c.height){					
+				py = c.height;
+			}		
+			if (px < 0){
+				px = 0;
+			}		
+			if (py < 0){
+				py = 0;
+			}		
+			px = px-lpx;
+			py = py-lpy;
+			
+			
+			selectRect.x = lpx;
+			selectRect.y = lpy;
+			selectRect.width = px;
+			selectRect.height = py;
+			
+		}
+		if (srcImg != null)
+		{
+			cropRect.x = selectRect.x/c.width * srcImg.image.width;
+			cropRect.y = selectRect.y/c.height * srcImg.image.height;
+			cropRect.width = selectRect.width/c.width * srcImg.image.width;
+			cropRect.height = selectRect.height/c.height * srcImg.image.height;
+		}
+
+		drawSelection(octx,selectRect);
+		
+		drawVertex(octx, selectRect.x,selectRect.y);
+		drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y +  selectRect.height);		
+		drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y);
+		drawVertex(octx, selectRect.x , selectRect.y +  selectRect.height);
+			
+		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	
+	}
 	function DrawImage(image)
 	{
 		if (getMode() == 'fit')
