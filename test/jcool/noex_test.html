@@ -96,6 +96,18 @@
 	
 	function canvasMouseUp(evt){
 
+		if (pressed)
+		{
+			if (selectRect.width < 0 || selectRect.height < 0)
+			{
+				selectRect.x = selectRect.x + selectRect.width;
+				selectRect.y = selectRect.y + selectRect.height;
+				
+				selectRect.width =  Math.abs(selectRect.width);
+				selectRect.height =  Math.abs(selectRect.height);
+			}
+		}
+		
 		pressed = false;
 		if (!dragged && !pressedVertex.pressed)
 		{
@@ -227,18 +239,15 @@
 	function pressMove(evt)
 	{
 		dragged = true;
-		if (selectedRect)
-		{
+		if (selectedRect){
 			selectRect.x -= (lpx-evt.x);
 			selectRect.y -= (lpy-evt.y);
 				
 			lpx = evt.x;
 			lpy = evt.y;
 		}
-		else if (pressedVertex.pressed)
-		{
-			switch (pressedVertex.vertex)
-			{
+		else if (pressedVertex.pressed)	{
+			switch (pressedVertex.vertex){
 			case 'lefttop':
 				var xoff = evt.x - selectRect.x; 
 				var yoff = evt.y - selectRect.y
@@ -271,8 +280,7 @@
 				break
 			}
 		}
-		else
-		{
+		else {
 			// select가 허용범위보다 크거나 작은것을 방
 			var px = evt.x;
 			var py = evt.y;
@@ -296,10 +304,9 @@
 			selectRect.y = lpy;
 			selectRect.width = px;
 			selectRect.height = py;
-			
 		}
-		if (srcImg != null)
-		{
+		
+		if (srcImg != null)	{
 			cropRect.x = selectRect.x/c.width * srcImg.image.width;
 			cropRect.y = selectRect.y/c.height * srcImg.image.height;
 			cropRect.width = selectRect.width/c.width * srcImg.image.width;
