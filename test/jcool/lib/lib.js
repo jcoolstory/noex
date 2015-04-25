@@ -127,9 +127,13 @@ function drawSelection(ctx,sRect,focus){
 	ctx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
 	ctx.lineWidth = 1;	
 	ctx.globalCompositeOperation = "source-over";
-	ctx.strokeStyle = "lightgray";
+	ctx.strokeStyle = 'rgba(100,150,100,1)';
 	ctx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
 	ctx.stroke();
 	ctx.beginPath();
-
+	
+	drawVertex(ctx, sRect.x,sRect.y);
+	drawVertex(ctx, sRect.x +  sRect.width, sRect.y +  sRect.height);		
+	drawVertex(ctx, sRect.x +  sRect.width, sRect.y);
+	drawVertex(ctx, sRect.x , sRect.y +  sRect.height);
 }

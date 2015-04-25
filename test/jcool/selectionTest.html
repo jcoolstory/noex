@@ -249,11 +249,6 @@
 
 		drawSelection(octx,selectRect);
 		
-		drawVertex(octx, selectRect.x,selectRect.y);
-		drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y +  selectRect.height);		
-		drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y);
-		drawVertex(octx, selectRect.x , selectRect.y +  selectRect.height);
-			
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	
 	}
@@ -267,17 +262,6 @@
 			if (selectRect.width + selectRect.height <4)
 				return;
 			
-			drawVertex(octx, selectRect.x,selectRect.y,collisionTest(evt.x,evt.y,
-					selectRect.x,selectRect.y,3));
-			
-			drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,collisionTest(evt.x,evt.y,
-					selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,3));		
-
-			drawVertex(octx, selectRect.x +  selectRect.width, selectRect.y,collisionTest(evt.x,evt.y,
-					selectRect.x +  selectRect.width, selectRect.y,3));
-
-			drawVertex(octx, selectRect.x , selectRect.y +  selectRect.height,collisionTest(evt.x,evt.y,
-					selectRect.x , selectRect.y +  selectRect.height,3));
 		}
 	}
 	
