@@ -46,15 +46,9 @@
 	var lpy=0;
 	var cropRect = new Rectangle();
 	var dragged = false;
-	var selectVetexed = false; 
-	var Point = function(){
-		
-		this.x = 0;
-		this.y = 0;
-		this.vertex = "none";
-	};
-	
-	var selectVetex = new Point();
+	var pressedVertex = new Point();
+	pressedVertex.pressed = false;
+	pressedVertex.vertex = "none";
 	var selectedRect = false;
 	var selectRect = new Rectangle();
 	
@@ -70,11 +64,11 @@
 		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
 		drawImage(srcImg);
 	}
+	
 	function collisionTest(x1,y1,x2,y2,dist)
 	{
 		return Math.sqrt(Math.pow(x1-x2,2) + Math.pow(y1-y2,2)) <= dist; 
 	}
-
 	
 	function drawImage(image)
 	{
@@ -103,7 +97,7 @@
 	function canvasMouseUp(evt){
 
 		pressed = false;
-		if (!dragged && !selectVetexed)
+		if (!dragged && !pressedVertex.pressed)
 		{
 			octx.clearRect(0,0,oC.width,oC.height);
 			selectRect.reset();
@@ -111,17 +105,17 @@
 		dragged = false;
 		
 		selectedRect = false;
-		selectVetexed = false;
+		pressedVertex.pressed = false;
 	}
 	
 	//커서좌표
 	function cursorMove(e){
 		e.target.style.cursor = "Default";
 		cursored = false;
-		if(e.layerX > selectRect.x && e.layerX < selectRect.x + selectRect.w && e.layerY > selectRect.y && e.layerY < selectRect.y + selectRect.height){
-			e.target.style.cursor = "Default";
+		if(selectRect.contains(e.layerX,e.layerY)){
+			e.target.style.cursor = "Move";
 		}else if(e.layerX < selectRect.x && e.layerX > selectRect.x + selectRect.width && e.layerY < selectRect.y && e.layerY > selectRect.y + selectRect.height){
-			e.target.style.cursor = "Default";
+			e.target.style.cursor = "none";
 		}
 		
 		if(collisionTest(e.layerX, e.layerY, selectRect.x + selectRect.width, selectRect.y, 5)){
@@ -137,13 +131,6 @@
 		if(collisionTest(e.layerX, e.layerY, selectRect.x, selectRect.y, 5)){
 			e.target.style.cursor = "nw-resize";
 		}
-
-		/* e.target.style.cursor = "ne-resize";//오른쪽상단, 왼쪽하단 대각선
-		e.target.style.cursor = "nw-resize";// 왼쪽상단, 우측하단 대각선
-		e.target.style.cursor = "e-resize";//좌우
-		e.target.style.cursor = "s-resize";
-		
-		e.target.style.cursor = "Crosshair"; */
 	}
 	
 	
@@ -158,41 +145,41 @@
 		if (collisionTest(evt.x,evt.y,
 				selectRect.x,selectRect.y,5))
 		{
-			selectVetex.x = selectRect.x;
-			selectVetex.y = selectRect.y;
-			selectVetexed = true;
-			selectVetex.vertex = 'lefttop';
+			pressedVertex.x = selectRect.x;
+			pressedVertex.y = selectRect.y;
+			pressedVertex.pressed = true;
+			pressedVertex.vertex = 'lefttop';
  		}
 		
 		if (collisionTest(evt.x,evt.y,
 				selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,5))
 		{
-			selectVetex.x = selectRect.x +  selectRect.width;
-			selectVetex.y = selectRect.y +  selectRect.height;
-			selectVetexed = true;
-			selectVetex.vertex = 'rightbottom';
+			pressedVertex.x = selectRect.x +  selectRect.width;
+			pressedVertex.y = selectRect.y +  selectRect.height;
+			pressedVertex.pressed = true;
+			pressedVertex.vertex = 'rightbottom';
 		}
 
 		if (collisionTest(evt.x,evt.y, selectRect.x +  selectRect.width, selectRect.y,5))
 		{
-			selectVetex.x = selectRect.x +  selectRect.width;
-			selectVetex.y = selectRect.y;
-			selectVetexed = true;		
-			selectVetex.vertex = 'righttop';
+			pressedVertex.x = selectRect.x +  selectRect.width;
+			pressedVertex.y = selectRect.y;
+			pressedVertex.pressed = true;		
+			pressedVertex.vertex = 'righttop';
 		}
 
 		if (collisionTest(evt.x,evt.y,
 				selectRect.x , selectRect.y +  selectRect.height,5))
 		{
-			selectVetex.x = selectRect.x;
-			selectVetex.y = selectRect.y +  selectRect.height;
-			selectVetexed = true;
+			pressedVertex.x = selectRect.x;
+			pressedVertex.y = selectRect.y +  selectRect.height;
+			pressedVertex.pressed = true;
 
-			selectVetex.vertex = 'leftbottom';
+			pressedVertex.vertex = 'leftbottom';
 		}
 	}
 	
-function canvasMouseOver(evt){
+	function canvasMouseOver(evt){
 		
 		if (pressed)
 		{
@@ -235,6 +222,7 @@ function canvasMouseOver(evt){
 			ctx.drawImage(srcImg.image, cropRect.x+50,cropRect.y+50,cropRect.width,cropRect.height,offsetx,offsety,cropRect.width,cropRect.height);
 			octx.clearRect(0,0,oC.width,oC.height);
 		}
+		selectRect.reset();
 	}
 	function pressMove(evt)
 	{
@@ -247,9 +235,9 @@ function canvasMouseOver(evt){
 			lpx = evt.x;
 			lpy = evt.y;
 		}
-		else if (selectVetexed)
+		else if (pressedVertex.pressed)
 		{
-			switch (selectVetex.vertex)
+			switch (pressedVertex.vertex)
 			{
 			case 'lefttop':
 				var xoff = evt.x - selectRect.x; 
@@ -347,7 +335,7 @@ function canvasMouseOver(evt){
 		if (srcImg == null)
 			return;
 		DrawImage(srcImg);
-
+		selectRect.reset();
 		octx.clearRect(0,0,oC.width,oC.height);
 	}
 	

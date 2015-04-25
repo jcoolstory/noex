@@ -81,6 +81,12 @@ var ImageRect = function(){
 	};
 };
 
+var Point = function(){
+	
+	this.x = 0;
+	this.y = 0;
+};
+
 function drawVertex(context, x, y,focus){
 	
 	if (focus){
@@ -91,10 +97,10 @@ function drawVertex(context, x, y,focus){
 	}
 	else{	
 		context.lineWidth = 0;
-		context.fillStyle = 'white';
+		context.fillStyle = 'yellow';
 	}
 	
-	context.arc(x, y, 1.5, 0, 2 * Math.PI, true);
+	context.arc(x, y,2, 0, 2 * Math.PI, true);
 	
 	context.fill();
 	context.beginPath();
