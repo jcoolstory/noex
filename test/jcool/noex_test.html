@@ -12,23 +12,39 @@
 </head>
 <body onload=init()>
 	<div class="container" id="drop_zone">
-	<canvas id="view1" class="vcanvas" width="600" height="600"></canvas>
-	<canvas id="overlayCanvas" class="vcanvas" width="600" height="600"></canvas>
-	<div id="toolbar">toolbar</div>
+		<canvas id="view1" class="vcanvas" width="600" height="600"></canvas>
+		<canvas id="overlayCanvas" class="vcanvas" width="600" height="600"></canvas>
+		<div id="toolbar">toolbar</div>
 	</div>
 	<div class="layoutright">
-		<h3><span id="infomation"></span></h3>
-		<input type="file" id="inputbox" name="view1" onchange="readInput(this)"
-			multiple="multiple" />
-		<p>	<input type='radio' name='scalemode' id='scalefit' value='fit'/ checked> autofit
-		<input type='radio' name='scalemode' id='scaleorigin' value='origin'/> 1:1</p>
-		<p><button onclick="imagecrop()">Crop</button></p>
-		<p><button onclick="imageorigin()">Origin</button></p>
-		<p><button onclick="reflectionVertical()">Flip Vertical</button></p>
-		<p><button onclick="reflectionHorizon()">Flip Horizon</button></p>
-		<p><a href="#" id='saveFile' onclick="saveFile()" download="custom-filename.png">Save</a></p>
+		<h3>
+			<span id="infomation"></span>
+		</h3>
+		<input type="file" id="inputbox" name="view1"
+			onchange="readInput(this)" multiple="multiple" />
+		<p>
+			<input type='radio' name='scalemode' id='scalefit' value='fit'
+				/ checked> autofit <input type='radio' name='scalemode'
+				id='scaleorigin' value='origin' /> 1:1
+		</p>
+		<p>
+			<button onclick="imagecrop()">Crop</button>
+		</p>
+		<p>
+			<button onclick="imageorigin()">Origin</button>
+		</p>
+		<p>
+			<button onclick="reflectionVertical()">Flip Vertical</button>
+		</p>
+		<p>
+			<button onclick="reflectionHorizon()">Flip Horizon</button>
+		</p>
+		<p>
+			<a href="#" id='saveFile' onclick="saveFile()"
+				download="custom-filename.png">Save</a>
+		</p>
 	</div>
-	<br/>
+	<br />
 </body>
 <script>
 	var maxImage = 1;
@@ -69,7 +85,9 @@
 	{
 		return Math.sqrt(Math.pow(x1-x2,2) + Math.pow(y1-y2,2)) <= dist; 
 	}
-	
+	var offsetx =0;
+	var offsety =0;
+	var imageperscreen = 1.0;
 	function drawImage(image)
 	{
 		if (getMode() == 'fit')
@@ -77,9 +95,28 @@
 		else
 		{
 			ctx.fillRect(0,0,c.width,c.height);
-			var offsetx = (c.width - image.image.width)/2;
-			var offsety = (c.height - image.image.height)/2;
-			ctx.drawImage(image.image, image.x,image.y,image.width,image.height,offsetx,offsety,image.width,image.height);
+			var gap = image.image.width - image.image.height;
+			
+			if (gap > 0){ //가로가 크다
+				
+				imageperscreen = image.image.width / c.width;
+				offsetx = 0;
+				offsety = Math.abs((gap/imageperscreen)/2.0);	
+				var w=c.width;
+				
+				var h=image.image.height / imageperscreen;
+			}
+			else{ //세로가 크다
+				
+				imageperscreen = image.image.height / c.height;
+				offsetx = Math.abs((gap/imageperscreen)/2.0);	
+				offsety = 0;
+				var w=image.image.width / imageperscreen;
+				var h =c.height;
+			}			
+			
+		
+			ctx.drawImage(image.image, offsetx,offsety,w,h);
 		}
 	}
 	
@@ -203,6 +240,7 @@
 	}
 	
 
+
 	function imagecrop(){
 		if (srcImg == null)
 			return;
@@ -217,7 +255,7 @@
 			ctx.fillRect(0,0,c.width,c.height);
 			var offsetx = (c.width - cropRect.width)/2;
 			var offsety = (c.height - cropRect.height)/2;
-			ctx.drawImage(srcImg.image, cropRect.x+50,cropRect.y+50,cropRect.width,cropRect.height,offsetx,offsety,cropRect.width,cropRect.height);
+			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,offsetx,offsety,cropRect.width,cropRect.height);
 			octx.clearRect(0,0,oC.width,oC.height);
 		}
 		selectRect.reset();
