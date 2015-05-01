@@ -1,0 +1,32 @@
+<!DOCTYPE html><html>
+<head>
+<script type="text/javascript" src="lib/convolve.js"></script>
+</head>
+<script>
+var image = new Image();
+
+image.addEventListener('load', function () {
+    image.alt = 'Player';
+    document.body.appendChild(image);
+    var value = 1.0/25.0
+    // laplace filter
+    convolve(image,
+             [0, 1, 0,
+              1,-4	, 1,
+              0, 1, 0],
+             function (error, result) {
+                 if (error !== null) {
+                     console.error(error);
+                 } else {
+                     result.alt = 'Boundary';
+                     document.body.appendChild(result);
+                 }
+             }
+    );
+});
+
+image.src = 'img_the_scream.jpg';
+</script>
+<body>
+</body>
+</html>
