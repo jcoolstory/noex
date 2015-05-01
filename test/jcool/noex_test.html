@@ -103,7 +103,6 @@
 				offsetx = 0;
 				offsety = Math.abs((gap/imageperscreen)/2.0);	
 				var w=c.width;
-				
 				var h=image.image.height / imageperscreen;
 			}
 			else{ //세로가 크다
@@ -113,9 +112,8 @@
 				offsety = 0;
 				var w=image.image.width / imageperscreen;
 				var h =c.height;
-			}			
+			}
 			
-		
 			ctx.drawImage(image.image, offsetx,offsety,w,h);
 		}
 	}
@@ -136,11 +134,14 @@
 		{
 			if (selectRect.width < 0 || selectRect.height < 0)
 			{
-				selectRect.x = selectRect.x + selectRect.width;
-				selectRect.y = selectRect.y + selectRect.height;
+				if (selectRect.width <0)
+					selectRect.x = selectRect.x + selectRect.width;
+				if (selectRect.height <0)
+					selectRect.y = selectRect.y + selectRect.height;
 				
 				selectRect.width =  Math.abs(selectRect.width);
 				selectRect.height =  Math.abs(selectRect.height);
+				drawSelection(octx,selectRect);
 			}
 		}
 		
@@ -150,8 +151,8 @@
 			octx.clearRect(0,0,oC.width,oC.height);
 			selectRect.reset();
 		}
-		dragged = false;
 		
+		dragged = false;
 		selectedRect = false;
 		pressedVertex.pressed = false;
 	}
@@ -239,24 +240,51 @@
 		}
 	}
 	
-
-
 	function imagecrop(){
 		if (srcImg == null)
 			return;
-		
-		var xd = cropRect.x / srcImg.image.width;
+
 		var srcX,srcY,srcW,srcH;
 		if (getMode() == 'fit'){
+			cropRect.x = selectRect.x/c.width * srcImg.image.width;
+			cropRect.y = selectRect.y/c.height * srcImg.image.height;
+			cropRect.width = selectRect.width/c.width * srcImg.image.width;
+			cropRect.height = selectRect.height/c.height * srcImg.image.height;
+
 			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
 			octx.clearRect(0,0,oC.width,oC.height);
 		}
 		else{
 			ctx.fillRect(0,0,c.width,c.height);
-			var offsetx = (c.width - cropRect.width)/2;
-			var offsety = (c.height - cropRect.height)/2;
-			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,offsetx,offsety,cropRect.width,cropRect.height);
+			
+			cropRect.x = selectRect.x- offsetx;
+			cropRect.y = selectRect.y - offsety;
+			cropRect.x = cropRect.x/(c.width -offsetx*2) * srcImg.image.width;
+			cropRect.y = cropRect.y/(c.height-offsety*2) * srcImg.image.height;
+			cropRect.width = selectRect.width/(c.width -offsetx*2) * srcImg.image.width;
+			cropRect.height = selectRect.height/(c.height-offsety*2) * srcImg.image.height;
+
 			octx.clearRect(0,0,oC.width,oC.height);
+			
+			var gap = cropRect.width - cropRect.height;
+			if (gap > 0){ //가로가 크다
+				
+				imageperscreen = cropRect.width / c.width;
+				offsetx = 0;
+				offsety = Math.abs((gap/imageperscreen)/2.0);	
+				var w=c.width;
+				var h=cropRect.height / imageperscreen;
+			}
+			else{ //세로가 크다
+				
+				imageperscreen = cropRect.height / c.height;
+				offsetx = Math.abs((gap/imageperscreen)/2.0);	
+				offsety = 0;
+				var w=cropRect.width / imageperscreen;
+				var h =c.height;
+			}
+			
+			ctx.drawImage(srcImg.image,cropRect.x,cropRect.y,cropRect.width,cropRect.height, offsetx,offsety,w,h);
 		}
 		selectRect.reset();
 	}
@@ -330,19 +358,9 @@
 			selectRect.height = py;
 		}
 		
-		if (srcImg != null)	{
-			cropRect.x = selectRect.x/c.width * srcImg.image.width;
-			cropRect.y = selectRect.y/c.height * srcImg.image.height;
-			cropRect.width = selectRect.width/c.width * srcImg.image.width;
-			cropRect.height = selectRect.height/c.height * srcImg.image.height;
-		}
-
 		drawSelection(octx,selectRect);
-		
-
 			
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
-	
 	}
 	
 	
