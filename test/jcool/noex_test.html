@@ -14,7 +14,7 @@
 	<div class="container" id="drop_zone">
 		<canvas id="view1" class="vcanvas" width="600" height="600"></canvas>
 		<canvas id="overlayCanvas" class="vcanvas" width="600" height="600"></canvas>
-		<div id="toolbar">toolbar</div><div id="toolbar1">toolbar</div>
+		<p><span id="status1">toolbar</span><span id="status2">toolbar</span></p>
 	</div>
 	<div class="layoutright">
 		<h3>
@@ -23,9 +23,9 @@
 		<input type="file" id="inputbox" name="view1"
 			onchange="readInput(this)" multiple="multiple" />
 		<p>
-			<input type='radio' name='scalemode' id='scalefit' value='fit'
-				/ checked> autofit <input type='radio' name='scalemode'
-				id='scaleorigin' value='origin' /> 1:1
+			<input type='radio' name='scalemode' id='scaleorigin' value='origin'  checked />autofit
+			<input type='radio' name='scalemode' id='scalefit' value='fit'/> stretch
+			
 		</p>
 		<p>
 			<button onclick="imagecrop()">Crop</button>
@@ -49,8 +49,8 @@
 <script>
 	var maxImage = 1;
 	var infomationText = document.getElementById('infomation');
-	var toolbarText = document.getElementById('toolbar');
-	var toolbarText1 = document.getElementById('toolbar1');
+	var toolbarText = document.getElementById('status1');
+	var toolbarText1 = document.getElementById('status2');
 	
 	var c = document.getElementById('view1');
 	var oC = document.getElementById('overlayCanvas');
@@ -58,17 +58,20 @@
 	var ctx = c.getContext("2d");
 	var srcImg = null;
 	var backPattern = null;
- 	var pressed = false;
-	var dragmode = "move";
+ 	var mousePressed = false;
+
 	var lpx=0;
 	var lpy=0;
 	var cropRect = new Rectangle();
-	var dragged = false;
+	
 	var pressedVertex = new Point();
 	pressedVertex.pressed = false;
 	pressedVertex.vertex = "none";
-	var selectedRect = false;
-	var selectRect = new Rectangle();
+
+	var selection = new Rectangle();
+	selection.isSelect = false;
+	selection.dragging = false;
+	
 	var rPointX =0;
 	var rPointY =0;	
 	function RelativePosition(evt)
@@ -78,13 +81,12 @@
 	}
 	function refreshImage(name, src) {
 	
-		var img = src;		
 		srcImg = new ImageRect();
 		srcImg.x= 0;
 		srcImg.y = 0;
 		srcImg.width = ctx.canvas.width;
 		srcImg.height = ctx.canvas.height;
-		srcImg.image = img;
+		srcImg.image = src;
 		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
 		drawImage(srcImg);
 	}
@@ -95,19 +97,17 @@
 	}
 	var offsetx =0;
 	var offsety =0;
-	var imageperscreen = 1.0;
-	function drawImage(image)
-	{
+	function drawImage(image) {
+		
 		if (getMode() == 'fit')
 			srcImg.draw();
-		else
-		{
+		else {
 			ctx.fillRect(0,0,c.width,c.height);
 			var gap = image.image.width - image.image.height;
 			
 			if (gap > 0){ //가로가 크다
 				
-				imageperscreen = image.image.width / c.width;
+				var imageperscreen = image.image.width / c.width;
 				offsetx = 0;
 				offsety = Math.abs((gap/imageperscreen)/2.0);	
 				var w=c.width;
@@ -115,7 +115,7 @@
 			}
 			else{ //세로가 크다
 				
-				imageperscreen = image.image.height / c.height;
+				var imageperscreen = image.image.height / c.height;
 				offsetx = Math.abs((gap/imageperscreen)/2.0);	
 				offsety = 0;
 				var w=image.image.width / imageperscreen;
@@ -126,8 +126,7 @@
 		}
 	}
 	
-	function getMode()
-	{
+	function getMode() {
 		if (document.getElementById('scalefit').checked == true)
 			return "fit";
 		if (document.getElementById('scaleorigin').checked == true)
@@ -136,180 +135,135 @@
 		return "fit";
 	}
 	
+	function selectionValid(){
+		if (selection.width < 0 || selection.height < 0){
+			if (selection.width <0)
+				selection.x = selection.x + selection.width;
+			if (selection.height <0)
+				selection.y = selection.y + selection.height;
+			
+			selection.width =  Math.abs(selection.width);
+			selection.height =  Math.abs(selection.height);
+		}
+	}
+	
 	function canvasMouseUp(evt){
 		RelativePosition(evt);
-		if (pressed)
-		{
-			if (selectRect.width < 0 || selectRect.height < 0)
-			{
-				if (selectRect.width <0)
-					selectRect.x = selectRect.x + selectRect.width;
-				if (selectRect.height <0)
-					selectRect.y = selectRect.y + selectRect.height;
-				
-				selectRect.width =  Math.abs(selectRect.width);
-				selectRect.height =  Math.abs(selectRect.height);
-				
-			}
+		
+		if (mousePressed){
+			selectionValid();
 		}
 		
-		pressed = false;
-		if (!dragged && !pressedVertex.pressed)
-		{
+		if (!selection.dragging && !pressedVertex.pressed)	{
 			octx.clearRect(0,0,oC.width,oC.height);
-			selectRect.reset();
+			selection.reset();
 		}
-		
-		dragged = false;
-		selectedRect = false;
+		if (selection.width + selection.height <4){
+			octx.clearRect(0,0,oC.width,oC.height);
+			selection.reset();
+		}
+				
+		mousePressed = false;
+		selection.dragging = false;
+		selection.isSelect = false;
 		pressedVertex.pressed = false;
 	}
 	
-	//커서좌표
-	function cursorMove(e){
-		e.target.style.cursor = "Default";
-		cursored = false;
-		if(selectRect.contains(e.layerX,e.layerY)){
-			e.target.style.cursor = "Move";
-		}else if(e.layerX < selectRect.x && e.layerX > selectRect.x + selectRect.width && e.layerY < selectRect.y && e.layerY > selectRect.y + selectRect.height){
-			e.target.style.cursor = "none";
-		}
-		
-		if(collisionTest(e.layerX, e.layerY, selectRect.x + selectRect.width, selectRect.y, 5)){
-			e.target.style.cursor = "ne-resize";
-		}
-		if(collisionTest(e.layerX, e.layerY, selectRect.x + selectRect.width, selectRect.y + selectRect.height, 5)){
-			e.target.style.cursor = "nw-resize";
-
-		}
-		if(collisionTest(e.layerX, e.layerY, selectRect.x, selectRect.y+ selectRect.height, 5)){
-			e.target.style.cursor = "ne-resize";
-		}
-		if(collisionTest(e.layerX, e.layerY, selectRect.x, selectRect.y, 5)){
-			e.target.style.cursor = "nw-resize";
-		}
-	}
-	var temp1
-	function canvasMouseDown(evt){
-	temp1 =evt;
-		RelativePosition(evt);
-		pressed = true;	
-		lpx = evt.layerX;
-		lpy = evt.layerY;
-		
-		if (selectRect.contains(evt.layerX,evt.layerY)){
-			selectedRect = true;
-		}
+	function vertextTest(evt){
 		
 		if (collisionTest(evt.layerX,evt.layerY,
-				selectRect.x,selectRect.y,5))
+				selection.x,selection.y,5))
 		{
-			pressedVertex.x = selectRect.x;
-			pressedVertex.y = selectRect.y;
+			pressedVertex.x = selection.x;
+			pressedVertex.y = selection.y;
 			pressedVertex.pressed = true;
 			pressedVertex.vertex = 'lefttop';
  		}
 		
 		if (collisionTest(evt.layerX,evt.layerY,
-				selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,5))
+				selection.x +  selection.width, selection.y +  selection.height,5))
 		{
-			pressedVertex.x = selectRect.x +  selectRect.width;
-			pressedVertex.y = selectRect.y +  selectRect.height;
+			pressedVertex.x = selection.x +  selection.width;
+			pressedVertex.y = selection.y +  selection.height;
 			pressedVertex.pressed = true;
 			pressedVertex.vertex = 'rightbottom';
 		}
 
-		if (collisionTest(evt.layerX,evt.layerY, selectRect.x +  selectRect.width, selectRect.y,5))
+		if (collisionTest(evt.layerX,evt.layerY, selection.x +  selection.width, selection.y,5))
 		{
-			pressedVertex.x = selectRect.x +  selectRect.width;
-			pressedVertex.y = selectRect.y;
+			pressedVertex.x = selection.x +  selection.width;
+			pressedVertex.y = selection.y;
 			pressedVertex.pressed = true;		
 			pressedVertex.vertex = 'righttop';
 		}
 
 		if (collisionTest(evt.layerX,evt.layerY,
-				selectRect.x , selectRect.y +  selectRect.height,5))
+				selection.x , selection.y +  selection.height,5))
 		{
-			pressedVertex.x = selectRect.x;
-			pressedVertex.y = selectRect.y +  selectRect.height;
+			pressedVertex.x = selection.x;
+			pressedVertex.y = selection.y +  selection.height;
 			pressedVertex.pressed = true;
 
 			pressedVertex.vertex = 'leftbottom';
 		}
 	}
 	
+	function canvasMouseDown(evt){
+		RelativePosition(evt);
+		mousePressed = true;	
+		lpx = evt.layerX;
+		lpy = evt.layerY;
+		
+		if (selection.contains(evt.layerX,evt.layerY)){
+			selection.isSelect = true;
+		}
+		
+		vertextTest(evt);
+	}
+	
 	function canvasMouseOver(evt){
 		RelativePosition(evt);
 	
-		toolbarText1.innerHTML = '(' + evt.layerX +',' +  evt.layerY + ')-(' + evt.layerX +',' + evt.layerY+ ')'; 
+		toolbarText1.innerHTML = '(' + evt.layerX +',' +  evt.layerY + ')'; 
 
-		if (pressed){
+		if (mousePressed){
 			pressMove(evt);
 		}
 		else {
-			if (selectRect.width + selectRect.height <4)
-				return;
-				
 			cursorMove(evt)
 		}
-		
-		
 	}
 	
-	function imagecrop(){
-		if (srcImg == null)
-			return;
-
-		var srcX,srcY,srcW,srcH;
-		if (getMode() == 'fit'){
-			cropRect.x = selectRect.x/c.width * srcImg.image.width;
-			cropRect.y = selectRect.y/c.height * srcImg.image.height;
-			cropRect.width = selectRect.width/c.width * srcImg.image.width;
-			cropRect.height = selectRect.height/c.height * srcImg.image.height;
-
-			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
-			octx.clearRect(0,0,oC.width,oC.height);
+	
+	function cursorMove(e){
+		e.target.style.cursor = "Default";
+		cursored = false;
+		if(selection.contains(e.layerX,e.layerY)){
+			e.target.style.cursor = "Move";
+		}else if(e.layerX < selection.x && e.layerX > selection.x + selection.width && e.layerY < selection.y && e.layerY > selection.y + selection.height){
+			e.target.style.cursor = "none";
 		}
-		else{
-			ctx.fillRect(0,0,c.width,c.height);
-			
-			cropRect.x = selectRect.x- offsetx;
-			cropRect.y = selectRect.y - offsety;
-			cropRect.x = cropRect.x/(c.width -offsetx*2) * srcImg.image.width;
-			cropRect.y = cropRect.y/(c.height-offsety*2) * srcImg.image.height;
-			cropRect.width = selectRect.width/(c.width -offsetx*2) * srcImg.image.width;
-			cropRect.height = selectRect.height/(c.height-offsety*2) * srcImg.image.height;
-
-			octx.clearRect(0,0,oC.width,oC.height);
-			
-			var gap = cropRect.width - cropRect.height;
-			if (gap > 0){ //가로가 크다
-				
-				imageperscreen = cropRect.width / c.width;
-				offsetx = 0;
-				offsety = Math.abs((gap/imageperscreen)/2.0);	
-				var w=c.width;
-				var h=cropRect.height / imageperscreen;
-			}
-			else{ //세로가 크다
-				
-				imageperscreen = cropRect.height / c.height;
-				offsetx = Math.abs((gap/imageperscreen)/2.0);	
-				offsety = 0;
-				var w=cropRect.width / imageperscreen;
-				var h =c.height;
-			}
-			
-			ctx.drawImage(srcImg.image,cropRect.x,cropRect.y,cropRect.width,cropRect.height, offsetx,offsety,w,h);
+		
+		if(collisionTest(e.layerX, e.layerY, selection.x + selection.width, selection.y, 5)){
+			e.target.style.cursor = "ne-resize";
 		}
-		selectRect.reset();
+		if(collisionTest(e.layerX, e.layerY, selection.x + selection.width, selection.y + selection.height, 5)){
+			e.target.style.cursor = "nw-resize";
+
+		}
+		if(collisionTest(e.layerX, e.layerY, selection.x, selection.y+ selection.height, 5)){
+			e.target.style.cursor = "ne-resize";
+		}
+		if(collisionTest(e.layerX, e.layerY, selection.x, selection.y, 5)){
+			e.target.style.cursor = "nw-resize";
+		}
 	}
 	
 	function pressMove(evt)	{
-		dragged = true;
-		if (selectedRect){
-			selectRect.x -= (lpx-evt.layerX);
-			selectRect.y -= (lpy-evt.layerY);
+		selection.dragging = true;
+		if (selection.isSelect){
+			selection.x -= (lpx-evt.layerX);
+			selection.y -= (lpy-evt.layerY);
 				
 			lpx = evt.layerX;
 			lpy = evt.layerY;
@@ -317,34 +271,33 @@
 		else if (pressedVertex.pressed)	{
 			switch (pressedVertex.vertex){
 			case 'lefttop':
-				var xoff = evt.layerX - selectRect.x; 
-				var yoff = evt.layerY - selectRect.y
-				selectRect.x = evt.layerX;
-				selectRect.y = evt.layerY;
-				selectRect.width -= xoff; 
-				selectRect.height -= yoff;
+				var xoff = evt.layerX - selection.x; 
+				var yoff = evt.layerY - selection.y
+				selection.x = evt.layerX;
+				selection.y = evt.layerY;
+				selection.width -= xoff; 
+				selection.height -= yoff;
 				break
 			case 'righttop':
-				var xoff = evt.layerX - selectRect.x; 
-				var yoff = evt.layerY - selectRect.y
-				selectRect.y = evt.layerY;
-				selectRect.width = xoff; 
-				selectRect.height -= yoff;
+				var xoff = evt.layerX - selection.x; 
+				var yoff = evt.layerY - selection.y
+				selection.y = evt.layerY;
+				selection.width = xoff; 
+				selection.height -= yoff;
 				break
 			case 'rightbottom':
-				var xoff = evt.layerX - selectRect.x; 
-				var yoff = evt.layerY - selectRect.y
+				var xoff = evt.layerX - selection.x; 
+				var yoff = evt.layerY - selection.y
 				
-				selectRect.width = xoff; 
-				selectRect.height = yoff;
+				selection.width = xoff; 
+				selection.height = yoff;
 				break
 			case 'leftbottom':
-				var xoff = evt.layerX - selectRect.x; 
-				var yoff = evt.layerY - selectRect.y
-				selectRect.x = evt.layerX;
-			//	selectRect.y = evt.layerY;
-				selectRect.width -= xoff ; 
-				selectRect.height = yoff;
+				var xoff = evt.layerX - selection.x; 
+				var yoff = evt.layerY - selection.y
+				selection.x = evt.layerX;
+				selection.width -= xoff ; 
+				selection.height = yoff;
 				break
 			}
 		}
@@ -367,25 +320,74 @@
 			px = px-lpx;
 			py = py-lpy;
 			
-			
-			selectRect.x = lpx;
-			selectRect.y = lpy;
-			selectRect.width = px;
-			selectRect.height = py;
+			selection.x = lpx;
+			selection.y = lpy;
+			selection.width = px;
+			selection.height = py;
 		}
 		
-		drawSelection(octx,selectRect);
+		drawSelection(octx,selection);
 		
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	}
 	
+	
+	function imagecrop(){
+		if (srcImg == null)
+			return;
+
+		var srcX,srcY,srcW,srcH;
+		
+		if (getMode() == 'fit') {
+			cropRect.x = selection.x/c.width * srcImg.image.width;
+			cropRect.y = selection.y/c.height * srcImg.image.height;
+			cropRect.width = selection.width/c.width * srcImg.image.width;
+			cropRect.height = selection.height/c.height * srcImg.image.height;
+
+			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
+			octx.clearRect(0,0,oC.width,oC.height);
+		}
+		else{
+			ctx.fillRect(0,0,c.width,c.height);
+			
+			cropRect.x = selection.x- offsetx;
+			cropRect.y = selection.y - offsety;
+			cropRect.x = cropRect.x/(c.width -offsetx*2) * srcImg.image.width;
+			cropRect.y = cropRect.y/(c.height-offsety*2) * srcImg.image.height;
+			cropRect.width = selection.width/(c.width -offsetx*2) * srcImg.image.width;
+			cropRect.height = selection.height/(c.height-offsety*2) * srcImg.image.height;
+
+			octx.clearRect(0,0,oC.width,oC.height);
+			
+			var gap = cropRect.width - cropRect.height;
+			if (gap > 0) { //가로가 크다
+				
+				var imageperscreen = cropRect.width / c.width;
+				offsetx = 0;
+				offsety = Math.abs((gap/imageperscreen)/2.0);	
+				var w=c.width;
+				var h=cropRect.height / imageperscreen;
+			}
+			else { //세로가 크다
+				
+				var imageperscreen = cropRect.height / c.height;
+				offsetx = Math.abs((gap/imageperscreen)/2.0);	
+				offsety = 0;
+				var w=cropRect.width / imageperscreen;
+				var h =c.height;
+			}
+			
+			ctx.drawImage(srcImg.image,cropRect.x,cropRect.y,cropRect.width,cropRect.height, offsetx,offsety,w,h);
+		}
+		selection.reset();
+	}
 	
 	function imageorigin(){
 	
 		if (srcImg == null)
 			return;
 		drawImage(srcImg);
-		selectRect.reset();
+		selection.reset();
 		octx.clearRect(0,0,oC.width,oC.height);
 	}
 	
