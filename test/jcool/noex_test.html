@@ -14,7 +14,7 @@
 	<div class="container" id="drop_zone">
 		<canvas id="view1" class="vcanvas" width="600" height="600"></canvas>
 		<canvas id="overlayCanvas" class="vcanvas" width="600" height="600"></canvas>
-		<div id="toolbar">toolbar</div>
+		<div id="toolbar">toolbar</div><div id="toolbar1">toolbar</div>
 	</div>
 	<div class="layoutright">
 		<h3>
@@ -50,6 +50,8 @@
 	var maxImage = 1;
 	var infomationText = document.getElementById('infomation');
 	var toolbarText = document.getElementById('toolbar');
+	var toolbarText1 = document.getElementById('toolbar1');
+	
 	var c = document.getElementById('view1');
 	var oC = document.getElementById('overlayCanvas');
 	var octx = oC.getContext("2d");
@@ -67,7 +69,13 @@
 	pressedVertex.vertex = "none";
 	var selectedRect = false;
 	var selectRect = new Rectangle();
-	
+	var rPointX =0;
+	var rPointY =0;	
+	function RelativePosition(evt)
+	{
+		rPointX =evt.x - c.offsetLeft + window.scrollX;
+		rPointY =evt.y- c.offsetTop +window.scrollY;
+	}
 	function refreshImage(name, src) {
 	
 		var img = src;		
@@ -129,7 +137,7 @@
 	}
 	
 	function canvasMouseUp(evt){
-
+		RelativePosition(evt);
 		if (pressed)
 		{
 			if (selectRect.width < 0 || selectRect.height < 0)
@@ -181,16 +189,19 @@
 			e.target.style.cursor = "nw-resize";
 		}
 	}
-	
+	var temp1
 	function canvasMouseDown(evt){
+	temp1 =evt;
+		RelativePosition(evt);
 		pressed = true;	
-		lpx = evt.x;
-		lpy = evt.y;
-		if (selectRect.contains(evt)){
+		lpx = rPointX;
+		lpy = rPointY;
+		
+		if (selectRect.contains(rPointX,rPointY)){
 			selectedRect = true;
 		}
 		
-		if (collisionTest(evt.x,evt.y,
+		if (collisionTest(rPointX,rPointY,
 				selectRect.x,selectRect.y,5))
 		{
 			pressedVertex.x = selectRect.x;
@@ -199,7 +210,7 @@
 			pressedVertex.vertex = 'lefttop';
  		}
 		
-		if (collisionTest(evt.x,evt.y,
+		if (collisionTest(rPointX,rPointY,
 				selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,5))
 		{
 			pressedVertex.x = selectRect.x +  selectRect.width;
@@ -208,7 +219,7 @@
 			pressedVertex.vertex = 'rightbottom';
 		}
 
-		if (collisionTest(evt.x,evt.y, selectRect.x +  selectRect.width, selectRect.y,5))
+		if (collisionTest(rPointX,rPointY, selectRect.x +  selectRect.width, selectRect.y,5))
 		{
 			pressedVertex.x = selectRect.x +  selectRect.width;
 			pressedVertex.y = selectRect.y;
@@ -216,7 +227,7 @@
 			pressedVertex.vertex = 'righttop';
 		}
 
-		if (collisionTest(evt.x,evt.y,
+		if (collisionTest(rPointX,rPointY,
 				selectRect.x , selectRect.y +  selectRect.height,5))
 		{
 			pressedVertex.x = selectRect.x;
@@ -228,7 +239,10 @@
 	}
 	
 	function canvasMouseOver(evt){
-		
+		RelativePosition(evt);
+	
+		toolbarText1.innerHTML = '(' + rPointX +',' +  rPointY + ')-(' + rPointX +',' + rPointY+ ')'; 
+
 		if (pressed){
 			pressMove(evt);
 		}
@@ -238,6 +252,8 @@
 				
 			cursorMove(evt)
 		}
+		
+		
 	}
 	
 	function imagecrop(){
@@ -292,41 +308,41 @@
 	function pressMove(evt)	{
 		dragged = true;
 		if (selectedRect){
-			selectRect.x -= (lpx-evt.x);
-			selectRect.y -= (lpy-evt.y);
+			selectRect.x -= (lpx-rPointX);
+			selectRect.y -= (lpy-rPointY);
 				
-			lpx = evt.x;
-			lpy = evt.y;
+			lpx = rPointX;
+			lpy = rPointY;
 		}
 		else if (pressedVertex.pressed)	{
 			switch (pressedVertex.vertex){
 			case 'lefttop':
-				var xoff = evt.x - selectRect.x; 
-				var yoff = evt.y - selectRect.y
-				selectRect.x = evt.x;
-				selectRect.y = evt.y;
+				var xoff = rPointX - selectRect.x; 
+				var yoff = rPointY - selectRect.y
+				selectRect.x = rPointX;
+				selectRect.y = rPointY;
 				selectRect.width -= xoff; 
 				selectRect.height -= yoff;
 				break
 			case 'righttop':
-				var xoff = evt.x - selectRect.x; 
-				var yoff = evt.y - selectRect.y
-				selectRect.y = evt.y;
+				var xoff = rPointX - selectRect.x; 
+				var yoff = rPointY - selectRect.y
+				selectRect.y = rPointY;
 				selectRect.width = xoff; 
 				selectRect.height -= yoff;
 				break
 			case 'rightbottom':
-				var xoff = evt.x - selectRect.x; 
-				var yoff = evt.y - selectRect.y
+				var xoff = rPointX - selectRect.x; 
+				var yoff = rPointY - selectRect.y
 				
 				selectRect.width = xoff; 
 				selectRect.height = yoff;
 				break
 			case 'leftbottom':
-				var xoff = evt.x - selectRect.x; 
-				var yoff = evt.y - selectRect.y
-				selectRect.x = evt.x;
-			//	selectRect.y = evt.y;
+				var xoff = rPointX - selectRect.x; 
+				var yoff = rPointY - selectRect.y
+				selectRect.x = rPointX;
+			//	selectRect.y = rPointY;
 				selectRect.width -= xoff ; 
 				selectRect.height = yoff;
 				break
@@ -334,8 +350,8 @@
 		}
 		else {
 			// select가 허용범위보다 크거나 작은것을 방
-			var px = evt.x;
-			var py = evt.y;
+			var px = rPointX;
+			var py = rPointY;
 			if (px > c.width){
 				px = c.width;
 			}		
