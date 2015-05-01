@@ -73,8 +73,8 @@
 	var rPointY =0;	
 	function RelativePosition(evt)
 	{
-		rPointX =evt.x - c.offsetLeft + window.scrollX;
-		rPointY =evt.y- c.offsetTop +window.scrollY;
+		//evt.layerX =evt.x - c.offsetLeft + window.scrollX;
+		//evt.layerY =evt.y- c.offsetTop +window.scrollY;
 	}
 	function refreshImage(name, src) {
 	
@@ -149,7 +149,7 @@
 				
 				selectRect.width =  Math.abs(selectRect.width);
 				selectRect.height =  Math.abs(selectRect.height);
-				drawSelection(octx,selectRect);
+				
 			}
 		}
 		
@@ -194,14 +194,14 @@
 	temp1 =evt;
 		RelativePosition(evt);
 		pressed = true;	
-		lpx = rPointX;
-		lpy = rPointY;
+		lpx = evt.layerX;
+		lpy = evt.layerY;
 		
-		if (selectRect.contains(rPointX,rPointY)){
+		if (selectRect.contains(evt.layerX,evt.layerY)){
 			selectedRect = true;
 		}
 		
-		if (collisionTest(rPointX,rPointY,
+		if (collisionTest(evt.layerX,evt.layerY,
 				selectRect.x,selectRect.y,5))
 		{
 			pressedVertex.x = selectRect.x;
@@ -210,7 +210,7 @@
 			pressedVertex.vertex = 'lefttop';
  		}
 		
-		if (collisionTest(rPointX,rPointY,
+		if (collisionTest(evt.layerX,evt.layerY,
 				selectRect.x +  selectRect.width, selectRect.y +  selectRect.height,5))
 		{
 			pressedVertex.x = selectRect.x +  selectRect.width;
@@ -219,7 +219,7 @@
 			pressedVertex.vertex = 'rightbottom';
 		}
 
-		if (collisionTest(rPointX,rPointY, selectRect.x +  selectRect.width, selectRect.y,5))
+		if (collisionTest(evt.layerX,evt.layerY, selectRect.x +  selectRect.width, selectRect.y,5))
 		{
 			pressedVertex.x = selectRect.x +  selectRect.width;
 			pressedVertex.y = selectRect.y;
@@ -227,7 +227,7 @@
 			pressedVertex.vertex = 'righttop';
 		}
 
-		if (collisionTest(rPointX,rPointY,
+		if (collisionTest(evt.layerX,evt.layerY,
 				selectRect.x , selectRect.y +  selectRect.height,5))
 		{
 			pressedVertex.x = selectRect.x;
@@ -241,7 +241,7 @@
 	function canvasMouseOver(evt){
 		RelativePosition(evt);
 	
-		toolbarText1.innerHTML = '(' + rPointX +',' +  rPointY + ')-(' + rPointX +',' + rPointY+ ')'; 
+		toolbarText1.innerHTML = '(' + evt.layerX +',' +  evt.layerY + ')-(' + evt.layerX +',' + evt.layerY+ ')'; 
 
 		if (pressed){
 			pressMove(evt);
@@ -308,41 +308,41 @@
 	function pressMove(evt)	{
 		dragged = true;
 		if (selectedRect){
-			selectRect.x -= (lpx-rPointX);
-			selectRect.y -= (lpy-rPointY);
+			selectRect.x -= (lpx-evt.layerX);
+			selectRect.y -= (lpy-evt.layerY);
 				
-			lpx = rPointX;
-			lpy = rPointY;
+			lpx = evt.layerX;
+			lpy = evt.layerY;
 		}
 		else if (pressedVertex.pressed)	{
 			switch (pressedVertex.vertex){
 			case 'lefttop':
-				var xoff = rPointX - selectRect.x; 
-				var yoff = rPointY - selectRect.y
-				selectRect.x = rPointX;
-				selectRect.y = rPointY;
+				var xoff = evt.layerX - selectRect.x; 
+				var yoff = evt.layerY - selectRect.y
+				selectRect.x = evt.layerX;
+				selectRect.y = evt.layerY;
 				selectRect.width -= xoff; 
 				selectRect.height -= yoff;
 				break
 			case 'righttop':
-				var xoff = rPointX - selectRect.x; 
-				var yoff = rPointY - selectRect.y
-				selectRect.y = rPointY;
+				var xoff = evt.layerX - selectRect.x; 
+				var yoff = evt.layerY - selectRect.y
+				selectRect.y = evt.layerY;
 				selectRect.width = xoff; 
 				selectRect.height -= yoff;
 				break
 			case 'rightbottom':
-				var xoff = rPointX - selectRect.x; 
-				var yoff = rPointY - selectRect.y
+				var xoff = evt.layerX - selectRect.x; 
+				var yoff = evt.layerY - selectRect.y
 				
 				selectRect.width = xoff; 
 				selectRect.height = yoff;
 				break
 			case 'leftbottom':
-				var xoff = rPointX - selectRect.x; 
-				var yoff = rPointY - selectRect.y
-				selectRect.x = rPointX;
-			//	selectRect.y = rPointY;
+				var xoff = evt.layerX - selectRect.x; 
+				var yoff = evt.layerY - selectRect.y
+				selectRect.x = evt.layerX;
+			//	selectRect.y = evt.layerY;
 				selectRect.width -= xoff ; 
 				selectRect.height = yoff;
 				break
@@ -350,8 +350,8 @@
 		}
 		else {
 			// select가 허용범위보다 크거나 작은것을 방
-			var px = rPointX;
-			var py = rPointY;
+			var px = evt.layerX;
+			var py = evt.layerY;
 			if (px > c.width){
 				px = c.width;
 			}		
@@ -375,7 +375,7 @@
 		}
 		
 		drawSelection(octx,selectRect);
-			
+		
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	}
 	
