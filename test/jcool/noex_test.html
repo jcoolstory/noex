@@ -442,13 +442,15 @@
 			ctx.fill();
 		};
 		imageObj.src = 'img/parttern.bmp';
+		
+		var dropZone = document.getElementById('drop_zone')
+		// Setup the dnd listeners. 
+		dropZone.addEventListener('dragover', handleDragOver, false);
+		dropZone.addEventListener('drop', handleImageDrop, false);
+		dropZone.addEventListener('mousemove', canvasMouseOver ,false)
+		dropZone.addEventListener('mousedown', canvasMouseDown ,false)
+		dropZone.addEventListener('mouseup', canvasMouseUp ,false)	
 	}
-	var dropZone = document.getElementById('drop_zone')
-	// Setup the dnd listeners. 
-	dropZone.addEventListener('dragover', handleDragOver, false);
-	dropZone.addEventListener('drop', handleImageDrop, false);
-	dropZone.addEventListener('mousemove', canvasMouseOver ,false)
-	dropZone.addEventListener('mousedown', canvasMouseDown ,false)
-	dropZone.addEventListener('mouseup', canvasMouseUp ,false)	
+	
 </script>
 </html>
