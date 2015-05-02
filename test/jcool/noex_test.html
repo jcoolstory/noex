@@ -12,8 +12,8 @@
 </head>
 <body onload=init()>
 	<div class="container" id="drop_zone">
-		<canvas id="view1" class="vcanvas" width="600" height="600"></canvas>
-		<canvas id="overlayCanvas" class="vcanvas" width="600" height="600"></canvas>
+		<canvas id="view1" class="vcanvas" width="800" height="600"></canvas>
+		<canvas id="overlayCanvas" class="vcanvas" width="800" height="600"></canvas>
 		<p><span id="status1">toolbar</span><span id="status2">toolbar</span></p>
 	</div>
 	<div class="layoutright">
@@ -109,14 +109,14 @@
 				
 				var imageperscreen = image.image.width / c.width;
 				offsetx = 0;
-				offsety = Math.abs((gap/imageperscreen)/2.0);	
+				offsety = Math.abs((c.height-image.image.height/imageperscreen)/2.0);	
 				var w=c.width;
 				var h=image.image.height / imageperscreen;
 			}
 			else{ //세로가 크다
-				
-				var imageperscreen = image.image.height / c.height;
-				offsetx = Math.abs((gap/imageperscreen)/2.0);	
+
+				var imageperscreen = image.image.height / c.height;				
+				offsetx =Math.abs((c.width-image.image.width/imageperscreen)/2.0);	
 				offsety = 0;
 				var w=image.image.width / imageperscreen;
 				var h =c.height;
@@ -363,19 +363,28 @@
 			if (gap > 0) { //가로가 크다
 				
 				var imageperscreen = cropRect.width / c.width;
-				offsetx = 0;
-				offsety = Math.abs((gap/imageperscreen)/2.0);	
+				
 				var w=c.width;
 				var h=cropRect.height / imageperscreen;
+				
+				offsetx = 0;
+				//offsety = Math.abs((gap/imageperscreen)/2.0);	
+				offsety = Math.abs((c.height-h)/2.0);	
+				
 			}
 			else { //세로가 크다
 				
 				var imageperscreen = cropRect.height / c.height;
-				offsetx = Math.abs((gap/imageperscreen)/2.0);	
-				offsety = 0;
+				
 				var w=cropRect.width / imageperscreen;
 				var h =c.height;
+				
+				//offsetx = Math.abs((gap/imageperscreen)/2.0);	
+				offsetx =Math.abs((c.width-w)/2.0);	
+				offsety = 0;
+				console.log(offsetx);
 			}
+			
 			
 			ctx.drawImage(srcImg.image,cropRect.x,cropRect.y,cropRect.width,cropRect.height, offsetx,offsety,w,h);
 		}
