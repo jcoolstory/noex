@@ -106,11 +106,45 @@ function drawVertex(context, x, y,focus){
 	context.beginPath();
 }
 
+function drawDashedLine(context, x1, y1, x2, y2, dashLength){
+	dashLength = dashLength === undefined ? 5 : dashLength;
+	
+	var deltaX = x2- x1;
+	var deltaY = y2-y1;
+	var numDashes = Math.floor(
+		Math.sqrt(deltaX * deltaX + deltaY * deltaY)/dashLength);
+	
+	for (var i =0 ; i < numDashes ;i++){
+		context[i % 2 === 0? 'moveTo':'lineTo'](x1+(deltaX / numDashes)
+			* i ,y1 + (deltaY / numDashes) * i);
+	}
+	
+	context.stroke();
+}
 
 function drawSelection(ctx,sRect,focus){
 	
 	ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+	ctx.fillStyle ='rgba(30,30,30,0.5)';
+	ctx.fillRect(0, 0, ctx.canvas.width,ctx.canvas.height);
+	ctx.globalCompositeOperation = 'destination-out';
+	ctx.fillStyle = "black";
+	
+	ctx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
+	ctx.fill();
+	
+	
+	ctx.beginPath();
+	ctx.lineWidth = 2	;	
+	ctx.globalCompositeOperation = "source-over";
+	ctx.strokeStyle = '#3a5795';
+//	ctx.strokeStyle = '#888';
 
+	ctx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
+	ctx.stroke();
+	
+	ctx.beginPath();
+	
 	ctx.strokeStyle = "back";
 	ctx.moveTo(sRect.x + (sRect.width /3), sRect.y);
 	ctx.lineTo(sRect.x + (sRect.width /3), sRect.y+sRect.height);
@@ -120,17 +154,8 @@ function drawSelection(ctx,sRect,focus){
 	ctx.lineTo(sRect.x + sRect.width, sRect.y+(sRect.height /3));
 	ctx.moveTo(sRect.x, sRect.y+(sRect.height /1.5));
 	ctx.lineTo(sRect.x + sRect.width, sRect.y+(sRect.height /1.5));
-
-	ctx.fillStyle ='rgba(30,30,30,0.8)';
-	ctx.fillRect(0, 0, ctx.canvas.width,ctx.canvas.height);
-	ctx.globalCompositeOperation = 'destination-out';
-	ctx.fillStyle = "black";
+	ctx.lineWidth = 1;
 	
-	ctx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
-	ctx.lineWidth = 1	;	
-	ctx.globalCompositeOperation = "source-over";
-	ctx.strokeStyle = '#3a5795';
-	ctx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
 	ctx.stroke();
 	ctx.beginPath();
 	

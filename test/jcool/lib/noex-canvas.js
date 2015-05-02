@@ -406,5 +406,11 @@ var maxImage = 1;
 		dropZone.addEventListener('mousemove', canvasMouseOver ,false)
 		dropZone.addEventListener('mousedown', canvasMouseDown ,false)
 		dropZone.addEventListener('mouseup', canvasMouseUp ,false)	
+		
+		var ShadowColor = 'rgba(1,0,1,1)';
+		octx.shadowColor = ShadowColor;
+		octx.shadowOffsetX = 1;
+		octx.shadowOffsetY = 1;
+		octx.shadowBlur =5;
 	}
 	
