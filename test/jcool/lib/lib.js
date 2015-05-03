@@ -163,6 +163,12 @@ function Selection(){
 		drawVertex(ctx, this.x +  this.width, this.y +  this.height);		
 		drawVertex(ctx, this.x +  this.width, this.y);
 		drawVertex(ctx, this.x , this.y +  this.height);
+		
+		drawVertex(ctx, this.x + this.width /2 , this.y);
+		drawVertex(ctx, this.x + this.width /2 , this.y + this.height);
+		drawVertex(ctx, this.x , this.y +  this.height /2);
+		drawVertex(ctx, this.x+ this.width , this.y +  this.height/2);
+		
 	}
 }
 Selection.prototype = new Rectangle();

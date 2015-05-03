@@ -162,6 +162,33 @@ var maxImage = 1;
 
 			pressedVertex.vertex = 'leftbottom';
 		}
+		
+		
+		if(collisionTest(evt.layerX, evt.layerY, selection.x , selection.y+ selection.height/2, 5)){
+			pressedVertex.x = selection.x;
+			pressedVertex.y = selection.y+ selection.height/2;
+			pressedVertex.pressed = true;
+			pressedVertex.vertex = 'left';
+		}
+		if(collisionTest(evt.layerX, evt.layerY, selection.x + selection.width, selection.y+ selection.height/2, 5)){
+			pressedVertex.x = selection.x + selection.width;
+			pressedVertex.y = selection.y+ selection.height/2;
+			pressedVertex.pressed = true;
+			pressedVertex.vertex = 'right';
+		}
+		if(collisionTest(evt.layerX, evt.layerY, selection.x + selection.width /2, selection.y, 5)){
+			pressedVertex.x = selection.x + selection.width /2;
+			pressedVertex.y = selection.y;
+			pressedVertex.pressed = true;
+			pressedVertex.vertex = 'top';
+		}
+		if(collisionTest(evt.layerX, evt.layerY,  selection.x + selection.width /2, selection.y+ selection.height, 5)){
+			pressedVertex.x = selection.x + selection.width /2;
+			pressedVertex.y = selection.y + selection.height;
+			pressedVertex.pressed = true;
+			pressedVertex.vertex = 'bottom';
+		}
+		
 	}
 	
 	function canvasMouseDown(evt){
@@ -170,7 +197,9 @@ var maxImage = 1;
 		lpx = evt.layerX;
 		lpy = evt.layerY;
 		
-		if (selection.contains(evt.layerX,evt.layerY)){
+		
+		
+		if (selection.contains( evt.layerX,evt.layerY)){
 			selection.isSelect = true;
 		}
 		
@@ -213,18 +242,28 @@ var maxImage = 1;
 		if(collisionTest(e.layerX, e.layerY, selection.x, selection.y, 5)){
 			e.target.style.cursor = "nw-resize";
 		}
+		
+		////
+		
+		if(collisionTest(e.layerX, e.layerY, selection.x , selection.y+ selection.height/2, 5)){
+			e.target.style.cursor = "e-resize";
+		}
+		if(collisionTest(e.layerX, e.layerY, selection.x + selection.width, selection.y+ selection.height/2, 5)){
+			e.target.style.cursor = "w-resize";
+
+		}
+		if(collisionTest(e.layerX, e.layerY, selection.x + selection.width /2, selection.y, 5)){
+			e.target.style.cursor = "n-resize";
+		}
+		if(collisionTest(e.layerX, e.layerY,  selection.x + selection.width /2, selection.y+ selection.height, 5)){
+			e.target.style.cursor = "s-resize";
+		}
+		
 	}
 	
 	function pressMove(evt)	{
 		selection.dragging = true;
-		if (selection.isSelect){
-			selection.x -= (lpx-evt.layerX);
-			selection.y -= (lpy-evt.layerY);
-				
-			lpx = evt.layerX;
-			lpy = evt.layerY;
-		}
-		else if (pressedVertex.pressed)	{
+		if (pressedVertex.pressed)	{
 			switch (pressedVertex.vertex){
 			case 'lefttop':
 				var xoff = evt.layerX - selection.x; 
@@ -255,7 +294,32 @@ var maxImage = 1;
 				selection.width -= xoff ; 
 				selection.height = yoff;
 				break
-			}
+				///////
+			case 'left':
+				var yoff = evt.layerY - selection.y
+				selection.x =  evt.layerX;
+				selection.width -= xoff; 
+				break
+			case 'right':
+				var xoff = evt.layerX - selection.x; 
+				selection.width = xoff; 
+				break
+			case 'top':
+				var yoff = evt.layerY - selection.y
+				selection.y = evt.layerY;
+				selection.height -= yoff;
+				break
+			case 'bottom':
+				var yoff = evt.layerY - selection.y
+				selection.height = yoff;
+				break
+			} 
+		}else if (selection.isSelect){
+			selection.x -= (lpx-evt.layerX);
+			selection.y -= (lpy-evt.layerY);
+				
+			lpx = evt.layerX;
+			lpy = evt.layerY;
 		}
 		else {
 			// select가 허용범위보다 크거나 작은것을 방
