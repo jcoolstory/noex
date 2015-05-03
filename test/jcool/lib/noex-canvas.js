@@ -15,10 +15,6 @@ var maxImage = 1;
 	var lpy=0;
 	var cropRect = new Rectangle();
 	
-	var pressedVertex = new Point();
-	pressedVertex.pressed = false;
-	pressedVertex.vertex = "none";
-
 	var selection = new Selection();
 	
 	var rPointX =0;
@@ -41,21 +37,16 @@ var maxImage = 1;
 		drawImage(srcImg);
 	}
 	
-	function collisionTest(x1,y1,x2,y2,dist)
-	{
-		return Math.sqrt(Math.pow(x1-x2,2) + Math.pow(y1-y2,2)) <= dist; 
-	}
-	
 	function CalRectAutoFit(imgW,imgH,dstW,dstH){
 	
 		var gap = imgW - imgH;
 		if (gap > 0){ //가로가 크다
 				
-				var imageperscreen = imgW / dstW;
-				var w=dstW;
-				var h=imgH / imageperscreen;
-				offsetx = 0;
-				offsety = Math.abs((dstH-h)/2.0);	
+			var imageperscreen = imgW / dstW;
+			var w=dstW;
+			var h=imgH / imageperscreen;
+			offsetx = 0;
+			offsety = Math.abs((dstH-h)/2.0);	
 		}
 		else{ //세로가 크다
 
@@ -110,7 +101,7 @@ var maxImage = 1;
 			selectionValid();
 		}
 		
-		if (!selection.dragging && !pressedVertex.pressed)	{
+		if (!selection.dragging && !selection.pressedVertex.pressed)	{
 			octx.clearRect(0,0,oC.width,oC.height);
 			selection.reset();
 		}
@@ -118,77 +109,9 @@ var maxImage = 1;
 			octx.clearRect(0,0,oC.width,oC.height);
 			selection.reset();
 		}
-				
+		
 		mousePressed = false;
-		selection.dragging = false;
-		selection.isSelect = false;
-		pressedVertex.pressed = false;
-	}
-	
-	function vertextTest(evt){
-		
-		if (collisionTest(evt.layerX,evt.layerY,
-				selection.x,selection.y,5))
-		{
-			pressedVertex.x = selection.x;
-			pressedVertex.y = selection.y;
-			pressedVertex.pressed = true;
-			pressedVertex.vertex = 'lefttop';
- 		}
-		
-		if (collisionTest(evt.layerX,evt.layerY,
-				selection.x +  selection.width, selection.y +  selection.height,5))
-		{
-			pressedVertex.x = selection.x +  selection.width;
-			pressedVertex.y = selection.y +  selection.height;
-			pressedVertex.pressed = true;
-			pressedVertex.vertex = 'rightbottom';
-		}
-
-		if (collisionTest(evt.layerX,evt.layerY, selection.x +  selection.width, selection.y,5))
-		{
-			pressedVertex.x = selection.x +  selection.width;
-			pressedVertex.y = selection.y;
-			pressedVertex.pressed = true;		
-			pressedVertex.vertex = 'righttop';
-		}
-
-		if (collisionTest(evt.layerX,evt.layerY,
-				selection.x , selection.y +  selection.height,5))
-		{
-			pressedVertex.x = selection.x;
-			pressedVertex.y = selection.y +  selection.height;
-			pressedVertex.pressed = true;
-
-			pressedVertex.vertex = 'leftbottom';
-		}
-		
-		
-		if(collisionTest(evt.layerX, evt.layerY, selection.x , selection.y+ selection.height/2, 5)){
-			pressedVertex.x = selection.x;
-			pressedVertex.y = selection.y+ selection.height/2;
-			pressedVertex.pressed = true;
-			pressedVertex.vertex = 'left';
-		}
-		if(collisionTest(evt.layerX, evt.layerY, selection.x + selection.width, selection.y+ selection.height/2, 5)){
-			pressedVertex.x = selection.x + selection.width;
-			pressedVertex.y = selection.y+ selection.height/2;
-			pressedVertex.pressed = true;
-			pressedVertex.vertex = 'right';
-		}
-		if(collisionTest(evt.layerX, evt.layerY, selection.x + selection.width /2, selection.y, 5)){
-			pressedVertex.x = selection.x + selection.width /2;
-			pressedVertex.y = selection.y;
-			pressedVertex.pressed = true;
-			pressedVertex.vertex = 'top';
-		}
-		if(collisionTest(evt.layerX, evt.layerY,  selection.x + selection.width /2, selection.y+ selection.height, 5)){
-			pressedVertex.x = selection.x + selection.width /2;
-			pressedVertex.y = selection.y + selection.height;
-			pressedVertex.pressed = true;
-			pressedVertex.vertex = 'bottom';
-		}
-		
+		selection.resetStatus();
 	}
 	
 	function canvasMouseDown(evt){
@@ -197,13 +120,11 @@ var maxImage = 1;
 		lpx = evt.layerX;
 		lpy = evt.layerY;
 		
-		
-		
-		if (selection.contains( evt.layerX,evt.layerY)){
+		if (selection.contains(evt.layerX,evt.layerY)){
 			selection.isSelect = true;
 		}
 		
-		vertextTest(evt);
+		selection.vertextTest(evt);
 	}
 	
 	function canvasMouseOver(evt){
@@ -219,7 +140,6 @@ var maxImage = 1;
 		}
 	}
 	
-	
 	function cursorMove(e){
 		e.target.style.cursor = "Default";
 		cursored = false;
@@ -234,7 +154,6 @@ var maxImage = 1;
 		}
 		if(collisionTest(e.layerX, e.layerY, selection.x + selection.width, selection.y + selection.height, 5)){
 			e.target.style.cursor = "nw-resize";
-
 		}
 		if(collisionTest(e.layerX, e.layerY, selection.x, selection.y+ selection.height, 5)){
 			e.target.style.cursor = "ne-resize";
@@ -242,15 +161,11 @@ var maxImage = 1;
 		if(collisionTest(e.layerX, e.layerY, selection.x, selection.y, 5)){
 			e.target.style.cursor = "nw-resize";
 		}
-		
-		////
-		
 		if(collisionTest(e.layerX, e.layerY, selection.x , selection.y+ selection.height/2, 5)){
 			e.target.style.cursor = "e-resize";
 		}
 		if(collisionTest(e.layerX, e.layerY, selection.x + selection.width, selection.y+ selection.height/2, 5)){
 			e.target.style.cursor = "w-resize";
-
 		}
 		if(collisionTest(e.layerX, e.layerY, selection.x + selection.width /2, selection.y, 5)){
 			e.target.style.cursor = "n-resize";
@@ -263,57 +178,8 @@ var maxImage = 1;
 	
 	function pressMove(evt)	{
 		selection.dragging = true;
-		if (pressedVertex.pressed)	{
-			switch (pressedVertex.vertex){
-			case 'lefttop':
-				var xoff = evt.layerX - selection.x; 
-				var yoff = evt.layerY - selection.y
-				selection.x = evt.layerX;
-				selection.y = evt.layerY;
-				selection.width -= xoff; 
-				selection.height -= yoff;
-				break
-			case 'righttop':
-				var xoff = evt.layerX - selection.x; 
-				var yoff = evt.layerY - selection.y
-				selection.y = evt.layerY;
-				selection.width = xoff; 
-				selection.height -= yoff;
-				break
-			case 'rightbottom':
-				var xoff = evt.layerX - selection.x; 
-				var yoff = evt.layerY - selection.y
-				
-				selection.width = xoff; 
-				selection.height = yoff;
-				break
-			case 'leftbottom':
-				var xoff = evt.layerX - selection.x; 
-				var yoff = evt.layerY - selection.y
-				selection.x = evt.layerX;
-				selection.width -= xoff ; 
-				selection.height = yoff;
-				break
-				///////
-			case 'left':
-				var yoff = evt.layerY - selection.y
-				selection.x =  evt.layerX;
-				selection.width -= xoff; 
-				break
-			case 'right':
-				var xoff = evt.layerX - selection.x; 
-				selection.width = xoff; 
-				break
-			case 'top':
-				var yoff = evt.layerY - selection.y
-				selection.y = evt.layerY;
-				selection.height -= yoff;
-				break
-			case 'bottom':
-				var yoff = evt.layerY - selection.y
-				selection.height = yoff;
-				break
-			} 
+		if (selection.pressedVertex.pressed)	{
+			selection.VertexMove(evt.layerX,evt.layerY);
 		}else if (selection.isSelect){
 			selection.x -= (lpx-evt.layerX);
 			selection.y -= (lpy-evt.layerY);
