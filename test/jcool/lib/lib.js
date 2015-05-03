@@ -69,11 +69,7 @@ var Rectangle = function(){
 };
 
 var ImageRect = function(){
-	
-	this.x = 0;
-	this.y = 0;
-	this.width = 0;
-	this.height = 0;
+
 	this.image = null;
 	
 	this.draw = function(){
@@ -122,45 +118,51 @@ function drawDashedLine(context, x1, y1, x2, y2, dashLength){
 	context.stroke();
 }
 
-function drawSelection(ctx,sRect,focus){
+function Selection(){
+	this.isSelect = false;
+	this.dragging = false;
 	
-	ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
-	ctx.fillStyle ='rgba(30,30,30,0.5)';
-	ctx.fillRect(0, 0, ctx.canvas.width,ctx.canvas.height);
-	ctx.globalCompositeOperation = 'destination-out';
-	ctx.fillStyle = "black";
+	this.draw = function(ctx){
 	
-	ctx.fillRect(sRect.x,sRect.y,sRect.width,sRect.height);		
-	ctx.fill();
-	
-	
-	ctx.beginPath();
-	ctx.lineWidth = 2	;	
-	ctx.globalCompositeOperation = "source-over";
-	ctx.strokeStyle = '#3a5795';
-//	ctx.strokeStyle = '#888';
+		ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+		ctx.fillStyle ='rgba(30,30,30,0.5)';
+		ctx.fillRect(0, 0, ctx.canvas.width,ctx.canvas.height);
+		ctx.globalCompositeOperation = 'destination-out';
+		ctx.fillStyle = "black";
+		
+		ctx.fillRect(this.x,this.y,this.width,this.height);		
+		ctx.fill();
+		
+		
+		ctx.beginPath();
+		ctx.lineWidth = 2	;	
+		ctx.globalCompositeOperation = "source-over";
+		ctx.strokeStyle = '#3a5795';
+	//	ctx.strokeStyle = '#888';
 
-	ctx.rect(sRect.x,sRect.y,sRect.width,sRect.height);		
-	ctx.stroke();
-	
-	ctx.beginPath();
-	
-	ctx.strokeStyle = "back";
-	ctx.moveTo(sRect.x + (sRect.width /3), sRect.y);
-	ctx.lineTo(sRect.x + (sRect.width /3), sRect.y+sRect.height);
-	ctx.moveTo(sRect.x + (sRect.width /1.5), sRect.y);
-	ctx.lineTo(sRect.x + (sRect.width /1.5), sRect.y+sRect.height);
-	ctx.moveTo(sRect.x, sRect.y+(sRect.height /3));
-	ctx.lineTo(sRect.x + sRect.width, sRect.y+(sRect.height /3));
-	ctx.moveTo(sRect.x, sRect.y+(sRect.height /1.5));
-	ctx.lineTo(sRect.x + sRect.width, sRect.y+(sRect.height /1.5));
-	ctx.lineWidth = 1;
-	
-	ctx.stroke();
-	ctx.beginPath();
-	
-	drawVertex(ctx, sRect.x,sRect.y);
-	drawVertex(ctx, sRect.x +  sRect.width, sRect.y +  sRect.height);		
-	drawVertex(ctx, sRect.x +  sRect.width, sRect.y);
-	drawVertex(ctx, sRect.x , sRect.y +  sRect.height);
+		ctx.rect(this.x,this.y,this.width,this.height);		
+		ctx.stroke();
+		
+		ctx.beginPath();
+		
+		ctx.strokeStyle = "back";
+		ctx.moveTo(this.x + (this.width /3), this.y);
+		ctx.lineTo(this.x + (this.width /3), this.y+this.height);
+		ctx.moveTo(this.x + (this.width /1.5), this.y);
+		ctx.lineTo(this.x + (this.width /1.5), this.y+this.height);
+		ctx.moveTo(this.x, this.y+(this.height /3));
+		ctx.lineTo(this.x + this.width, this.y+(this.height /3));
+		ctx.moveTo(this.x, this.y+(this.height /1.5));
+		ctx.lineTo(this.x + this.width, this.y+(this.height /1.5));
+		ctx.lineWidth = 1;
+		
+		ctx.stroke();
+		ctx.beginPath();
+		
+		drawVertex(ctx, this.x,this.y);
+		drawVertex(ctx, this.x +  this.width, this.y +  this.height);		
+		drawVertex(ctx, this.x +  this.width, this.y);
+		drawVertex(ctx, this.x , this.y +  this.height);
+	}
 }
+Selection.prototype = new Rectangle();

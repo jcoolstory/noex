@@ -19,9 +19,7 @@ var maxImage = 1;
 	pressedVertex.pressed = false;
 	pressedVertex.vertex = "none";
 
-	var selection = new Rectangle();
-	selection.isSelect = false;
-	selection.dragging = false;
+	var selection = new Selection();
 	
 	var rPointX =0;
 	var rPointY =0;	
@@ -37,10 +35,7 @@ var maxImage = 1;
 	function refreshImage(name, src) {
 	
 		srcImg = new ImageRect();
-		srcImg.x= 0;
-		srcImg.y = 0;
-		srcImg.width = ctx.canvas.width;
-		srcImg.height = ctx.canvas.height;
+		
 		srcImg.image = src;
 		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
 		drawImage(srcImg);
@@ -53,7 +48,6 @@ var maxImage = 1;
 	
 	function CalRectAutoFit(imgW,imgH,dstW,dstH){
 	
-
 		var gap = imgW - imgH;
 		if (gap > 0){ //가로가 크다
 				
@@ -62,7 +56,6 @@ var maxImage = 1;
 				var h=imgH / imageperscreen;
 				offsetx = 0;
 				offsety = Math.abs((dstH-h)/2.0);	
-			
 		}
 		else{ //세로가 크다
 
@@ -289,7 +282,7 @@ var maxImage = 1;
 			selection.height = py;
 		}
 		
-		drawSelection(octx,selection);
+		selection.draw(octx,selection);
 		
 		toolbarText.innerHTML = '(' + lpx +',' + lpy + ')-(' + px +',' + py + ')'; 
 	}
