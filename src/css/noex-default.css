@@ -1,0 +1,41 @@
+body{
+	margin: 0;
+}
+.imageViewer input {
+	margin-bottom: 10px;
+}
+
+.imageViewer canvas {	
+}
+
+.container {
+	
+	float: left;
+}
+.vcanvas {
+	border: 1px solid #aaa;	
+}
+
+
+.header{
+	background:yellow;
+	height:30px;
+}
+.thumblist{
+	background:red;
+	height:80px;
+}
+.layoutright {
+	float: right;
+}
+#overlayCanvas
+{
+    position:absolute;
+    left:0;
+    top:0;
+    z-index:100;
+    
+}
+.footer{
+	background:gray;
+}
