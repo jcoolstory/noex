@@ -233,7 +233,7 @@ var maxImage = 1;
 
 			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
 			octx.clearRect(0,0,oC.width,oC.height);
-			console.log(cropRect);
+			
 		}
 		else{
 			ctx.fillRect(0,0,c.width,c.height);
@@ -248,10 +248,10 @@ var maxImage = 1;
 			octx.clearRect(0,0,oC.width,oC.height);
 
 			var rect = CalRectAutoFit(cropRect.width,cropRect.height,c.width,c.height);
-			console.log(cropRect);
+
 			ctx.drawImage(srcImg.image,cropRect.x,cropRect.y,cropRect.width,cropRect.height, rect.x,rect.y,rect.width,rect.height);
 		}
-		console.log(cropRect);
+
 		selection.reset();
 	}
 	
