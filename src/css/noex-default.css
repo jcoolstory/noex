@@ -26,7 +26,7 @@ body{
 	height:80px;
 }
 .layoutright {
-	float: right;
+	float: left;
 }
 #overlayCanvas
 {
@@ -34,5 +34,6 @@ body{
     z-index:100;
 }
 .footer{
+	clear:both;
 	background:gray;
 }

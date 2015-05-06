@@ -219,6 +219,7 @@ var maxImage = 1;
 	
 	
 	function imagecrop(){
+		
 		if (srcImg == null)
 			return;
 
@@ -250,7 +251,7 @@ var maxImage = 1;
 			console.log(cropRect);
 			ctx.drawImage(srcImg.image,cropRect.x,cropRect.y,cropRect.width,cropRect.height, rect.x,rect.y,rect.width,rect.height);
 		}
-		
+		console.log(cropRect);
 		selection.reset();
 	}
 	
@@ -333,9 +334,9 @@ var maxImage = 1;
 		dropZone.addEventListener('mouseup', canvasMouseUp ,false)	
 		
 		var ShadowColor = 'rgba(1,0,1,1)';
-		octx.shadowColor = ShadowColor;
-		octx.shadowOffsetX = 1;
-		octx.shadowOffsetY = 1;
-		octx.shadowBlur =5;
+	//	octx.shadowColor = ShadowColor;
+	//	octx.shadowOffsetX = 1;
+	//	octx.shadowOffsetY = 1;
+	//	octx.shadowBlur =5;
 	}
 	

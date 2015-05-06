@@ -12,12 +12,19 @@ body{
 	
 	float: left;
 }
-
-
 .vcanvas {
 	border: 1px solid #aaa;	
 }
 
+
+.header{
+	background:yellow;
+	height:30px;
+}
+.thumblist{
+	background:red;
+	height:80px;
+}
 .layoutright {
 	float: left;
 }
@@ -25,4 +32,8 @@ body{
 {
     position:absolute;
     z-index:100;
+}
+.footer{
+	clear:both;
+	background:gray;
 }
