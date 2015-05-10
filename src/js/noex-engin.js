@@ -73,7 +73,7 @@ var ImageRect = function(){
 	this.image = null;
 	
 	this.draw = function(){
-		ctx.drawImage(this.image, this.x,this.y,this.width,this.height);
+		ctx.drawImage(this.image, 0,0);
 	};
 };
 

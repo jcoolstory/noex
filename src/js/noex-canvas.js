@@ -36,7 +36,13 @@ var maxImage = 1;
 		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
 		drawImage(srcImg);
 	}
-	
+	function CalRectOrigin(imgW,imgH,dstW,dstH){
+		
+		
+		var rect = new Rectangle();
+		rect.set(offsetx,offsety,w,h);
+		return rect ;
+	}
 	function CalRectAutoFit(imgW,imgH,dstW,dstH){
 	
 		var gap = imgW - imgH;
@@ -63,23 +69,26 @@ var maxImage = 1;
 	
 	
 	function drawImage(image) {
-		
-		if (getMode() == 'fit')
-			srcImg.draw();
-		else {
+		if (getMode() == 'fit'){
 			ctx.fillRect(0,0,c.width,c.height);
 			var rect = CalRectAutoFit(image.image.width,image.image.height,c.width,c.height);
 			ctx.drawImage(image.image, rect.x,rect.y,rect.width,rect.height);
+			
+		}
+		else {
+			ctx.fillRect(0,0,c.width,c.height);
+			image.draw();
 		}
 	}
 	
 	function getMode() {
+		return "fit";
 		if (document.getElementById('scalefit').checked == true)
 			return "fit";
 		if (document.getElementById('scaleorigin').checked == true)
 			return "origin"
 			
-		return "fit";
+		
 	}
 	
 	function selectionValid(){
@@ -226,16 +235,7 @@ var maxImage = 1;
 		var srcX,srcY,srcW,srcH;
 		
 		if (getMode() == 'fit') {
-			cropRect.x = selection.x/c.width * srcImg.image.width;
-			cropRect.y = selection.y/c.height * srcImg.image.height;
-			cropRect.width = selection.width/c.width * srcImg.image.width;
-			cropRect.height = selection.height/c.height * srcImg.image.height;
-
-			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
-			octx.clearRect(0,0,oC.width,oC.height);
 			
-		}
-		else{
 			ctx.fillRect(0,0,c.width,c.height);
 			
 			cropRect.x = selection.x- offsetx;
@@ -250,6 +250,19 @@ var maxImage = 1;
 			var rect = CalRectAutoFit(cropRect.width,cropRect.height,c.width,c.height);
 
 			ctx.drawImage(srcImg.image,cropRect.x,cropRect.y,cropRect.width,cropRect.height, rect.x,rect.y,rect.width,rect.height);
+			
+		}
+		else{
+			
+			
+			cropRect.x = selection.x/c.width * srcImg.image.width;
+			cropRect.y = selection.y/c.height * srcImg.image.height;
+			cropRect.width = selection.width/c.width * srcImg.image.width;
+			cropRect.height = selection.height/c.height * srcImg.image.height;
+
+			ctx.drawImage(srcImg.image, cropRect.x,cropRect.y,cropRect.width,cropRect.height,0,0,c.width,c.height);
+			octx.clearRect(0,0,oC.width,oC.height);
+			
 		}
 
 		selection.reset();
@@ -270,7 +283,7 @@ var maxImage = 1;
 			
 		ctx.translate(0, c.height);
         ctx.scale(1, -1);
-		ctx.drawImage(srcImg.image, 0,0,srcImg.image.width,srcImg.image.height,0,0,c.width,c.height);		
+		drawImage(srcImg);
 	}
 	
 	function reflectionHorizon(){
@@ -279,7 +292,7 @@ var maxImage = 1;
 			
 		ctx.translate(c.width, 0);
         ctx.scale(-1, 1);
-		ctx.drawImage(srcImg.image, 0,0,srcImg.image.width,srcImg.image.height,0,0,c.width,c.height);
+		drawImage(srcImg);
 	}
 	
 	function saveFile(){
