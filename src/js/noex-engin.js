@@ -8,6 +8,7 @@ function readSub(index, obj) {
 		img.onload = function() {
 			refreshImage("view" + (viewIndex + 1), this);
 			viewIndex++;
+			
 		};
 	};
 	reader.readAsDataURL(obj);

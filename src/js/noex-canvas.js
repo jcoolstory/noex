@@ -34,6 +34,15 @@ var maxImage = 1;
 		
 		srcImg.image = src;
 		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
+		
+		var li = document.createElement("li");
+		var thums = document.createElement("img");
+		thums.src =  img.src;
+		thums.setAttribute("height", "90");
+		thums.setAttribute("width", "90");
+		li.appendChild(thums);
+		thumblist.appendChild(li);			
+		
 		drawImage(srcImg);
 	}
 	function CalRectOrigin(imgW,imgH,dstW,dstH){
@@ -318,10 +327,15 @@ var maxImage = 1;
 		evt.dataTransfer.dropEffect = 'copy';
 	}
 	
+	function loadImage(obj){
+		readInput(obj);
+	}
+	
 	function init(){
 		infomationText = document.getElementById('infomation');
 		toolbarText = document.getElementById('status1');
 		toolbarText1 = document.getElementById('status2');
+		thumblist = document.getElementById('thumbcontainer');
 		
 		c = document.getElementById('editorCanvas');
 		oC = document.getElementById('overlayCanvas');

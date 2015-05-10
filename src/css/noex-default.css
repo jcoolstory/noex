@@ -22,8 +22,8 @@ body{
 	height:30px;
 }
 .thumblist{
-	background:red;
-	height:80px;
+	border:1px solid #aaa;
+	height:100px;
 }
 .layoutright {
 	float: left;
@@ -36,4 +36,17 @@ body{
 .footer{
 	clear:both;
 	background:gray;
+}
+.thumblist ul{
+	padding: 0px;
+	margin:0px;
+}
+.thumblist li{
+	list-style-type: none;
+	width: 90px;
+	height: 90px;
+	border: 1px solid gray;
+	float :left;
+	margin-top:4px;
+	margin-left:4px;
 }
