@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>noex</title>
+<link rel="stylesheet" type="text/javascript" href="css/layout.css"/>
+<script type="text/javascript" src="js/noex-engin.js"></script>
+<script type="text/javascript" src="js/noex-canvas.js"></script>
+</head>
+<body onload=init()>
+<section id="wrap">
+	<header id="header">
+		<article class="head_description">
+			<ul>
+				<li class="txt">
+					<span>
+						<strong>0</strong>장
+					</span>
+					 / 20장
+				</li>
+				<li>
+					장당 5MB이상 초가하실수 없습니다.
+				</li>
+				<li>
+					드래그&amp;드롭으로 20장까지 등록 가능합니다.
+				</li>
+			</ul>
+			<div>
+				<input type="file" multiple="multiple" id="inputbox" name="view1"
+			onchange="readInput(this)" multiple="multiple"/>
+			</div>
+		</article>
+		<article class="head_img_list">
+			<a href="#" class="btn prev">previous</a>
+			<a href="#" class="btn next">next</a>
+			<ul id="thumbcontainer">
+			
+			</ul>
+			<a href="#" class="slide_btn">▼ top</a>
+		</article>
+	</header>
+	<section id="container">
+	<div class="container" id="drop_zone">
+		<canvas id="overlayCanvas" class="vcanvas" width="800" height="600"></canvas>
+		<canvas id="editorCanvas" class="vcanvas" width="800" height="600"></canvas>
+	</div>
+		<aside id="aside">
+		
+		</aside>
+	</section>
+	<footer id="footer">
+		<a href=""><img src="./img/btn_save.gif" alt="PC 저장"/></a>
+		<a href=""><img src="./img/btn_update.gif" alt="올리기"/></a>
+	</footer>
+</section>
+</body>
+</html>

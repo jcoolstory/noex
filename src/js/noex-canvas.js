@@ -33,7 +33,7 @@ var maxImage = 1;
 		srcImg = new ImageRect();
 		
 		srcImg.image = src;
-		infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
+		//infomationText.innerHTML = 'width : ' + srcImg.image.width +' px <br/>height : ' + srcImg.image.height + ' px'; 
 		
 		var li = document.createElement("li");
 		var thums = document.createElement("img");
@@ -148,7 +148,7 @@ var maxImage = 1;
 	function canvasMouseOver(evt){
 		RelativePosition(evt);
 	
-		toolbarText1.innerHTML = '(' + evt.layerX +',' +  evt.layerY + ')'; 
+		//toolbarText1.innerHTML = '(' + evt.layerX +',' +  evt.layerY + ')'; 
 
 		if (mousePressed){
 			pressMove(evt);
@@ -342,15 +342,15 @@ var maxImage = 1;
 		octx = oC.getContext("2d");
 		ctx = c.getContext("2d");
 	
-		var imageObj = new Image();
-		imageObj.onload = function() {
-			var pattern = ctx.createPattern(imageObj, 'repeat');
+//var imageObj = new Image();
+	//	imageObj.onload = function() {
+	//		var pattern = ctx.createPattern(imageObj, 'repeat');
 
-			ctx.rect(0, 0, c.width, c.height);
-			ctx.fillStyle = pattern;
-			ctx.fill();
-		};
-		imageObj.src = 'img/parttern.bmp';
+	//		ctx.rect(0, 0, c.width, c.height);
+	//		ctx.fillStyle = pattern;
+	//		ctx.fill();
+	//	};
+	//	imageObj.src = 'img/parttern.bmp';
 		
 		var dropZone = document.getElementById('drop_zone')
 		// Setup the dnd listeners. 
